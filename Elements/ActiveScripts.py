@@ -90,8 +90,8 @@ class ActiveScripts:
         subprocess.Popen(["taskkill", "/F", "/IM", process_name])
 
     def edit_path(self):
-        path = askopenfilename()  # show an "Open" dialog box and return the path to the selected file
-        if path is None:
+        path = askopenfilename()
+        if not path:
             return
         path = path.replace("/", "\\")
         self.app.ahk = path
