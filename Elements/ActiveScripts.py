@@ -1,7 +1,7 @@
 import subprocess
 from os import listdir
 from os.path import isfile, join
-
+from tkinter.filedialog import askopenfilename
 import customtkinter
 
 import os
@@ -45,6 +45,10 @@ class ActiveScripts:
                                                         command=self.unload_all)
         self.as_unload_button.grid(row=2, column=1, padx=(10, 20), pady=(10, 0), sticky="nsew")
 
+        self.as_editpath_button = customtkinter.CTkButton(self.active_scripts_frame_2, text="Edit Ahk Path",
+                                                          command=self.edit_path)
+        self.as_editpath_button.grid(row=3, column=1, padx=(10, 20), pady=(10, 0), sticky="nsew")
+
         self.path_label = customtkinter.CTkLabel(self.active_scripts_frame_1,
                                                  text="AutoHotkey.exe path: ")
         self.path_label.grid(row=3, column=0, padx=20, pady=20)
@@ -82,5 +86,20 @@ class ActiveScripts:
         self.refresh()
 
     def unload_all(self):
-        process_name = self.app.ahk[self.app.ahk.rfind("\\")+1:]
+        process_name = self.app.ahk[self.app.ahk.rfind("\\") + 1:]
         subprocess.Popen(["taskkill", "/F", "/IM", process_name])
+
+    def edit_path(self):
+        path = askopenfilename()  # show an "Open" dialog box and return the path to the selected file
+        if path is None:
+            return
+        path = path.replace("/", "\\")
+        self.app.ahk = path
+        self.app.json_settings["ahk_path"] = path
+        if len(self.app.ahk) > 30:
+            text = self.app.ahk[:self.app.ahk.find("\\") + 1] + "...\\" + \
+                   self.app.ahk[self.app.ahk.rfind("\\") + 1:]
+        else:
+            text = self.app.ahk
+        self.app.active_scripts_window.path_label.configure(text="AutoHotkey.exe path: " + text, cursor="hand2")
+        self.app.active_scripts_window.path_label.bind("<Button-1>", self.app.open_path)

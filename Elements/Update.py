@@ -19,17 +19,17 @@ class Update:
         self.upd_libraries_group.grid(row=0, column=0, padx=(20, 20), pady=(10, 0), sticky="nsew")
 
         self.upd_application_group = customtkinter.CTkLabel(self.updates_frame_2, corner_radius=0, text="Application:")
-        self.upd_application_group.grid(row=0, column=1, padx=(20, 20), pady=(10, 0), sticky="nsew")
+        self.upd_application_group.grid(row=0, column=0, padx=(20, 20), pady=(10, 0), sticky="nsew")
 
-        self.upd_libraries_button = customtkinter.CTkButton(self.upd_libraries_group, text="Update Libraries",
+        self.upd_libraries_button = customtkinter.CTkButton(self.updates_frame_1, text="Update Libraries",
                                                             command=self.update_libs)
         self.upd_libraries_button.grid(row=1, column=0, padx=(20, 20), pady=(10, 0), sticky="nsew")
 
-        self.upd_folder_button = customtkinter.CTkButton(self.upd_libraries_group, text="Open Folder",
+        self.upd_folder_button = customtkinter.CTkButton(self.updates_frame_1, text="Open Folder",
                                                          command=self.open_folder)
         self.upd_folder_button.grid(row=2, column=0, padx=(20, 20), pady=(10, 0), sticky="nsew")
 
-        self.upd_application_button = customtkinter.CTkButton(self.upd_application_group, text="Update Application")
+        self.upd_application_button = customtkinter.CTkButton(self.updates_frame_2, text="Update Application")
         self.upd_application_button.grid(row=1, column=0, padx=(20, 20), pady=(10, 0), sticky="nsew")
 
     def open_folder(self):

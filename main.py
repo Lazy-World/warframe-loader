@@ -1,9 +1,7 @@
 import getpass
 import json
-
 import customtkinter
 import os
-
 from Elements.ActiveScripts import ActiveScripts
 from Elements.Workshop import Workshop
 from Elements.Update import Update
@@ -95,9 +93,9 @@ class App(customtkinter.CTk):
 
         self.settings_window = Settings(self)
 
-        self.withdraw()  # hide main window
         self.loading_window = AhkLoadingWindow(self)
         self.loading_window.protocol("WM_DELETE_WINDOW", self.loading_terminated)
+        self.loading_window.grab_set()
         # set default values
         self.select_frame_by_name("active_scripts")
         self.appearance_mode_menu.set("System")
@@ -106,10 +104,12 @@ class App(customtkinter.CTk):
 
     def loading_finished(self):
         self.loading_window.withdraw()
+        self.loading_window.grab_release()
         self.deiconify()
 
     def loading_terminated(self):
-        self.destroy()
+        self.loading_window.grab_release()
+        self.loading_window.destroy()
 
     def save_settings(self):
         with open(self.path + "\\hub.ini", "w") as file:
@@ -163,8 +163,16 @@ class App(customtkinter.CTk):
         if not os.path.exists(self.path + "\\workshop"):
             os.mkdir(self.path + "\\workshop")
 
+    def open_path(self, event):
+        if self.ahk is not None:
+            path = os.path.realpath(self.ahk[:self.ahk.rfind("\\") + 1])
+            os.startfile(path)
+        else:
+            pass
+
 
 if __name__ == "__main__":
     app = App()
+    app.update()
     app.check_path()
     app.mainloop()
