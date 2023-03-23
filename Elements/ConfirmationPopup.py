@@ -11,7 +11,7 @@ class ConfirmationPopup(CTkToplevel):
         self.geometry("150x100")
         self.title("LazyHub")
         self.resizable(False, False)
-        self.main_frame = customtkinter.CTkFrame(self, corner_radius=0, fg_color="transparent")
+        self.main_frame = customtkinter.CTkFrame(self, corner_radius=0, fg_color=self._fg_color)
         self.main_frame.grid(row=0, column=0, sticky="nsew")
         self.label_1 = customtkinter.CTkLabel(self.main_frame, text="Are you sure?")
         self.label_1.grid(row=0, column=0, padx=10, pady=10, columnspan=2)
@@ -24,6 +24,7 @@ class ConfirmationPopup(CTkToplevel):
         self.protocol("WM_DELETE_WINDOW", self.decline)
 
     def confirm(self):
+        self.main_app.check_path()
         filename = self.main_app.path + "\\lib\\game_settings.ahk"
         r = requests.get("https://raw.githubusercontent.com/Lazy-World/warframe-ahk/main/libraries/game_settings.ahk")
         with open(filename, 'wb') as f:

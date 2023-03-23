@@ -8,12 +8,7 @@ from Elements.Update import Update
 from Elements.Settings import Settings
 from Elements.AhkLoadingWindow import AhkLoadingWindow
 
-customtkinter.set_appearance_mode("System")  # Modes: "System" (standard), "Dark", "Light"
 customtkinter.set_default_color_theme("green")  # Themes: "blue" (standard), "green", "dark-blue"
-
-
-def change_appearance_mode_event(new_appearance_mode: str):
-    customtkinter.set_appearance_mode(new_appearance_mode)
 
 
 class App(customtkinter.CTk):
@@ -65,7 +60,7 @@ class App(customtkinter.CTk):
 
         # Settings
         self.appearance_mode_menu = customtkinter.CTkOptionMenu(
-            self.navigation_frame, values=["Light", "Dark", "System"], command=change_appearance_mode_event
+            self.navigation_frame, values=["Light", "Dark", "System"], command=self.change_appearance_mode_event
         )
         self.appearance_mode_menu.grid(row=6, column=0, padx=20, pady=(10, 10))
 
@@ -98,8 +93,6 @@ class App(customtkinter.CTk):
         self.loading_window.grab_set()
         # set default values
         self.select_frame_by_name("active_scripts")
-        self.appearance_mode_menu.set("System")
-
         self.protocol("WM_DELETE_WINDOW", self.save_settings)
 
     def loading_finished(self):
@@ -109,6 +102,10 @@ class App(customtkinter.CTk):
 
     def loading_terminated(self):
         self.loading_window.grab_release()
+        if not os.path.exists(self.path + "\\hub.ini"):
+            with open(self.path + "\\hub.ini", "w") as file:
+                self.json_settings = {"Version": "3.0", "theme": customtkinter.get_appearance_mode()}
+                json.dump(self.json_settings, file)
         self.loading_window.destroy()
 
     def save_settings(self):
@@ -125,12 +122,14 @@ class App(customtkinter.CTk):
         if name == "active_scripts":
             self.active_scripts_window.active_scripts_frame_1.grid(row=0, column=1, sticky="nsew")
             self.active_scripts_window.active_scripts_frame_2.grid(row=0, column=2, sticky="nsew")
+            self.active_scripts_window.refresh()
         else:
             self.active_scripts_window.active_scripts_frame_1.grid_forget()
             self.active_scripts_window.active_scripts_frame_2.grid_forget()
         if name == "workshop":
             self.workshop_window.workshop_frame_1.grid(row=0, column=1, sticky="nsew")
             self.workshop_window.workshop_frame_2.grid(row=0, column=2, sticky="nsew")
+            self.workshop_window.refresh()
         else:
             self.workshop_window.workshop_frame_1.grid_forget()
             self.workshop_window.workshop_frame_2.grid_forget()
@@ -170,9 +169,20 @@ class App(customtkinter.CTk):
         else:
             pass
 
+    def change_appearance_mode_event(self, new_appearance_mode: str):
+        customtkinter.set_appearance_mode(new_appearance_mode)
+        self.json_settings["theme"] = new_appearance_mode
+
 
 if __name__ == "__main__":
     app = App()
     app.update()
+    if "theme" not in app.json_settings.keys():
+        app.json_settings["theme"] = "System"
+        customtkinter.set_appearance_mode("System")  # Modes: "System" (standard), "Dark", "Light"
+        app.appearance_mode_menu.set("System")
+    else:
+        customtkinter.set_appearance_mode(app.json_settings["theme"])  # Modes: "System" (standard), "Dark", "Light"
+        app.appearance_mode_menu.set(app.json_settings["theme"])
     app.check_path()
     app.mainloop()

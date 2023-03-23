@@ -37,6 +37,7 @@ class Update:
         os.startfile(os.path.realpath(self.app.path+"\\lib"))
 
     def update_libs(self):
+        self.app.check_path()
         answer = requests.get("https://api.github.com/repos/Lazy-World/warframe-ahk/contents/libraries").content
         json_answer = json.loads(answer.decode("utf-8"))
         # pprint(json_answer)

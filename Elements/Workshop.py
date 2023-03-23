@@ -48,6 +48,7 @@ class Workshop:
                 self.scripts[item["name"]] = item["download_url"]
 
     def download_workshop(self):
+        self.app.check_path()
         for switch in self.scrollable_frame_switches_2:
             if switch.get() == 1:
                 filename = self.app.path + "\\workshop\\" + switch._text
