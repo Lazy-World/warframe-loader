@@ -32,7 +32,7 @@ class DownloadWindow(CTkToplevel):
         self.progress_bar.set(0)
 
         self.open_folder_button = customtkinter.CTkButton(self.main_frame, text="Open folder", width=240,
-                                                          command=open_folder)
+                                                          state="disabled", command=open_folder)
         self.open_folder_button.grid(row=2, column=0, padx=10, pady=10, sticky="nsew")
 
     def download(self):
