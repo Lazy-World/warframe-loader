@@ -1,6 +1,5 @@
 import json
 import os
-
 import customtkinter
 import requests as requests
 
@@ -34,11 +33,11 @@ class Workshop:
                                                          command=self.refresh)
         self.ws_refresh_button.grid(row=1, column=1, padx=(10, 20), pady=(10, 0), sticky="nsew")
 
-        self.refresh()
+        # self.refresh()
 
     def open_folder(self):
         self.app.check_path()
-        os.startfile(os.path.realpath(self.app.path+"\\workshop"))
+        os.startfile(os.path.realpath(self.app.workshop_path))
 
     def get_names(self):
         answer = requests.get("https://api.github.com/repos/Lazy-World/warframe-ahk/contents/").content
@@ -51,7 +50,7 @@ class Workshop:
         self.app.check_path()
         for switch in self.scrollable_frame_switches_2:
             if switch.get() == 1:
-                filename = self.app.path + "\\workshop\\" + switch._text
+                filename = self.app.workshop_path + "\\" + switch._text
                 r = requests.get(self.scripts[switch._text])
                 with open(filename, 'wb') as f:
                     f.write(r.content)

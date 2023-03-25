@@ -25,12 +25,13 @@ class Settings:
         self.open_folder_button = customtkinter.CTkButton(self.settings_frame_1, text="Open Folder",
                                                           command=self.open_folder)
         self.open_folder_button.grid(row=3, column=0, padx=(20, 20), pady=(10, 0), sticky="nsew")
+
         self.loading_window = ConfirmationPopup(self.app)
         self.loading_window.withdraw()
 
     def open_folder(self):
         self.app.check_path()
-        os.startfile(os.path.realpath(self.app.path+"\\lib"))
+        os.startfile(os.path.realpath(self.app.lib_path))
 
     def update_libs(self):
         self.loading_window.geometry(f"+{self.app.winfo_rootx()+300}+{self.app.winfo_rooty()}")

@@ -3,7 +3,6 @@ from os import listdir
 from os.path import isfile, join
 from tkinter.filedialog import askopenfilename
 import customtkinter
-
 import os
 
 
@@ -55,11 +54,11 @@ class ActiveScripts:
 
     def open_folder(self):
         self.app.check_path()
-        os.startfile(os.path.realpath(self.app.path + "\\workshop"))
+        os.startfile(os.path.realpath(self.app.workshop_path))
 
     def get_names(self):
-        self.scripts = [f for f in listdir(self.app.path + "\\workshop") if
-                        isfile(join(self.app.path + "\\workshop", f))]
+        self.scripts = [f for f in listdir(self.app.workshop_path) if
+                        isfile(join(self.app.workshop_path, f))]
 
     def refresh(self):
         if self.scrollable_frame_switches:
@@ -75,13 +74,13 @@ class ActiveScripts:
     def load_script(self):
         for switch in self.scrollable_frame_switches:
             if switch.get() == 1:
-                filename = self.app.path + "\\workshop\\" + switch._text
+                filename = self.app.workshop_path + "\\" + switch._text
                 subprocess.Popen([self.app.ahk, filename])
 
     def delete_script(self):
         for switch in self.scrollable_frame_switches:
             if switch.get() == 1:
-                filename = self.app.path + "\\workshop\\" + switch._text
+                filename = self.app.workshop_path + "\\" + switch._text
                 os.remove(filename)
         self.refresh()
 

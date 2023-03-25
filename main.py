@@ -1,21 +1,59 @@
+"""
+# imports necessary to get the path where the files are extracted in
+import os
+import sys
+
+# initializing a variable containing the path where application files are stored.
+application_path = ''
+
+# attempting to get where the program files are stored
+if getattr(sys, 'frozen', False):
+    # if program was frozen (compiled) using pyinstaller, the pyinstaller bootloader creates a sys attribute
+    # frozen=True to indicate that the script file was compiled using pyinstaller, then it creates a
+    # constant in sys that points to the directory where program executable is (where program files are extracted in).
+    application_path = sys._MEIPASS
+else:
+    # if program is not frozen (compiled) using pyinstaller and is running normally like a Python 3.x.x file.
+    application_path = os.path.dirname(os.path.abspath(__file__))
+
+# changing the current working directory to the path where one-file mode source files are extracted in.
+os.chdir(application_path)
+
+# importing customtkinter
+from customtkinter import *
+"""
 import getpass
 import json
+import threading
 import customtkinter
 import os
+import requests
+
 from Elements.ActiveScripts import ActiveScripts
 from Elements.Workshop import Workshop
 from Elements.Update import Update
 from Elements.Settings import Settings
 from Elements.AhkLoadingWindow import AhkLoadingWindow
+from Elements.UpdatesPopup import UpdatePopup
 
 customtkinter.set_default_color_theme("green")  # Themes: "blue" (standard), "green", "dark-blue"
+
+
+def get_online_version():
+    answer = requests.get(
+        "https://raw.githubusercontent.com/Lazy-World/warframe-ahk/LazyHub/LazyHub/latest.txt").content
+    return answer.decode("utf-8")
 
 
 class App(customtkinter.CTk):
     def __init__(self):
         super().__init__()
         self.path = 'C:\\Users\\%s\\AppData\\Roaming\\LazyHub' % getpass.getuser()
+        self.workshop_path = self.path+"\\workshop"
+        self.lib_path = self.path + "\\lib"
         self.ahk = None
+        self.online_version = get_online_version()
+        self.version = "3.0"
         self.json_settings = {}
         self.scrollable_frame_switches = None
         self.scrollable_frame = None
@@ -38,7 +76,7 @@ class App(customtkinter.CTk):
         self.navigation_frame.grid_rowconfigure(5, weight=1)
 
         self.navigation_frame_label = customtkinter.CTkLabel(
-            self.navigation_frame, text="LazyHub v3.0", compound="left",
+            self.navigation_frame, text="LazyHub v" + self.version, compound="left",
             font=customtkinter.CTkFont(size=15, weight="bold")
         )
         self.navigation_frame_label.grid(row=0, column=0, padx=20, pady=20)
@@ -90,22 +128,34 @@ class App(customtkinter.CTk):
 
         self.loading_window = AhkLoadingWindow(self)
         self.loading_window.protocol("WM_DELETE_WINDOW", self.loading_terminated)
-        self.loading_window.grab_set()
+
+        self.update_popup = UpdatePopup(self)
+        self.update_popup.protocol("WM_DELETE_WINDOW", self.close_update_popup)
+        if self.online_version != self.version:
+            self.loading_window.grab_release()
+            self.update_popup.grab_set()
+            self.update_popup.deiconify()
+        else:
+            self.close_update_popup()
+
         # set default values
         self.select_frame_by_name("active_scripts")
         self.protocol("WM_DELETE_WINDOW", self.save_settings)
+        self.set_appearance()
 
     def loading_finished(self):
-        self.loading_window.withdraw()
         self.loading_window.grab_release()
-        self.deiconify()
+        self.loading_window.destroy()
+        self.set_appearance()
+
+    def close_update_popup(self):
+        self.update_popup.grab_release()
+        self.loading_window.grab_set()
+        threading._start_new_thread(self.loading_window.generate_ini, ())
+        self.update_popup.destroy()
 
     def loading_terminated(self):
         self.loading_window.grab_release()
-        if not os.path.exists(self.path + "\\hub.ini"):
-            with open(self.path + "\\hub.ini", "w") as file:
-                self.json_settings = {"Version": "3.0", "theme": customtkinter.get_appearance_mode()}
-                json.dump(self.json_settings, file)
         self.loading_window.destroy()
 
     def save_settings(self):
@@ -129,7 +179,6 @@ class App(customtkinter.CTk):
         if name == "workshop":
             self.workshop_window.workshop_frame_1.grid(row=0, column=1, sticky="nsew")
             self.workshop_window.workshop_frame_2.grid(row=0, column=2, sticky="nsew")
-            self.workshop_window.refresh()
         else:
             self.workshop_window.workshop_frame_1.grid_forget()
             self.workshop_window.workshop_frame_2.grid_forget()
@@ -173,16 +222,25 @@ class App(customtkinter.CTk):
         customtkinter.set_appearance_mode(new_appearance_mode)
         self.json_settings["theme"] = new_appearance_mode
 
+    def set_appearance(self):
+        if not os.path.exists(self.path + "\\hub.ini"):
+            return
+        with open(self.path + "\\hub.ini", "r") as file:
+            try:
+                json_settings = json.load(file)
+                if "theme" not in json_settings.keys():
+                    customtkinter.set_appearance_mode("System")  # Modes: "System" (standard), "Dark", "Light"
+                    self.appearance_mode_menu.set("System")
+                else:
+                    customtkinter.set_appearance_mode(json_settings["theme"])
+                    self.appearance_mode_menu.set(json_settings["theme"])
+            except json.JSONDecodeError:
+                customtkinter.set_appearance_mode("System")  # Modes: "System" (standard), "Dark", "Light"
+                self.appearance_mode_menu.set("System")
+
 
 if __name__ == "__main__":
     app = App()
     app.update()
-    if "theme" not in app.json_settings.keys():
-        app.json_settings["theme"] = "System"
-        customtkinter.set_appearance_mode("System")  # Modes: "System" (standard), "Dark", "Light"
-        app.appearance_mode_menu.set("System")
-    else:
-        customtkinter.set_appearance_mode(app.json_settings["theme"])  # Modes: "System" (standard), "Dark", "Light"
-        app.appearance_mode_menu.set(app.json_settings["theme"])
     app.check_path()
     app.mainloop()
