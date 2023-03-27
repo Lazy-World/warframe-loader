@@ -50,8 +50,8 @@ class Workshop:
         self.app.check_path()
         for switch in self.scrollable_frame_switches_2:
             if switch.get() == 1:
-                filename = self.app.workshop_path + "\\" + switch._text
-                r = requests.get(self.scripts[switch._text])
+                filename = self.app.workshop_path + "\\" + switch.cget("text")
+                r = requests.get(self.scripts[switch.cget("text")])
                 with open(filename, 'wb') as f:
                     f.write(r.content)
         self.app.active_scripts_window.refresh()
@@ -62,7 +62,20 @@ class Workshop:
                 switch.destroy()
             self.scrollable_frame_switches_2.clear()
         self.get_names()
+        active_scripts = self.app.active_scripts_window.get_names()
         for i, name in enumerate(self.scripts.keys()):
-            switch = customtkinter.CTkCheckBox(master=self.ws_script_list, text=name)
+            script = requests.get(f"https://raw.githubusercontent.com/Lazy-World/warframe-ahk/main/{name}").content\
+                .decode("utf-8")
+            if name in active_scripts:
+                color = "#ffff00"
+            else:
+                color = "#000000"
+            for ahk in active_scripts:
+                with open(self.app.workshop_path+"\\"+ahk, "r") as file:
+                    local_script = file.read()
+                if local_script == script:
+                    color = "#00ff00"
+                    break
+            switch = customtkinter.CTkCheckBox(master=self.ws_script_list, text=name, border_color=color)
             switch.grid(row=i, column=0, padx=10, pady=(0, 20), sticky="nsew")
             self.scrollable_frame_switches_2.append(switch)

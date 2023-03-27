@@ -57,15 +57,15 @@ class ActiveScripts:
         os.startfile(os.path.realpath(self.app.workshop_path))
 
     def get_names(self):
-        self.scripts = [f for f in listdir(self.app.workshop_path) if
-                        isfile(join(self.app.workshop_path, f))]
+        return [f for f in listdir(self.app.workshop_path) if
+                isfile(join(self.app.workshop_path, f))]
 
     def refresh(self):
         if self.scrollable_frame_switches:
             for switch in self.scrollable_frame_switches:
                 switch.destroy()
             self.scrollable_frame_switches.clear()
-        self.get_names()
+        self.scripts = self.get_names()
         for i, name in enumerate(self.scripts):
             switch = customtkinter.CTkCheckBox(master=self.as_script_list, text=name)
             switch.grid(row=i, column=0, padx=10, pady=(0, 20), sticky="nsew")
@@ -74,13 +74,13 @@ class ActiveScripts:
     def load_script(self):
         for switch in self.scrollable_frame_switches:
             if switch.get() == 1:
-                filename = self.app.workshop_path + "\\" + switch._text
+                filename = self.app.workshop_path + "\\" + switch.cget("text")
                 subprocess.Popen([self.app.ahk, filename])
 
     def delete_script(self):
         for switch in self.scrollable_frame_switches:
             if switch.get() == 1:
-                filename = self.app.workshop_path + "\\" + switch._text
+                filename = self.app.workshop_path + "\\" + switch.cget("text")
                 os.remove(filename)
         self.refresh()
 

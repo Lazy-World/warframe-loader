@@ -6,8 +6,17 @@ import requests
 from Elements.ctk_toplevel import CTkToplevel
 
 
-def open_folder():
-    os.startfile(os.path.realpath(os.getcwd()))
+def get_download_path():
+    """Returns the default downloads path for linux or windows"""
+    if os.name == 'nt':
+        import winreg
+        sub_key = r'SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders'
+        downloads_guid = '{374DE290-123F-4565-9164-39C4925E467B}'
+        with winreg.OpenKey(winreg.HKEY_CURRENT_USER, sub_key) as key:
+            location = winreg.QueryValueEx(key, downloads_guid)[0]
+        return location
+    else:
+        return os.path.join(os.path.expanduser('~'), 'downloads')
 
 
 class DownloadWindow(CTkToplevel):
@@ -18,6 +27,7 @@ class DownloadWindow(CTkToplevel):
         self.title("LazyHub")
         self.iconbitmap("cat.ico")
         self.grab_set()
+        self.downloads = get_download_path()
         self.geometry(f"+{app.winfo_rootx() + 500}+{app.winfo_rooty()}")
         self.resizable(width=False, height=False)
 
@@ -32,11 +42,11 @@ class DownloadWindow(CTkToplevel):
         self.progress_bar.set(0)
 
         self.open_folder_button = customtkinter.CTkButton(self.main_frame, text="Open folder", width=240,
-                                                          state="disabled", command=open_folder)
+                                                          state="disabled", command=self.open_folder)
         self.open_folder_button.grid(row=2, column=0, padx=10, pady=10, sticky="nsew")
 
     def download(self):
-        with open("LazyHub_v." + self.main_app.online_version + ".exe", 'wb') as f:
+        with open(self.downloads+"\\"+"LazyHub_v." + self.main_app.online_version + ".exe", 'wb') as f:
             response = requests.get(
                 "https://raw.githubusercontent.com/Lazy-World/warframe-ahk/LazyHub/LazyHub/LazyHub.exe", stream=True)
             total = response.headers.get('content-length')
@@ -61,3 +71,6 @@ class DownloadWindow(CTkToplevel):
             self.open_folder_button.configure(state="normal")
         except _tkinter.TclError:
             return
+
+    def open_folder(self):
+        os.startfile(self.downloads)

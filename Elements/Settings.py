@@ -1,8 +1,8 @@
 import os
-import subprocess
 import customtkinter
 
 from Elements.ConfirmationPopup import ConfirmationPopup
+from Elements.EditSettings import EditSettings
 
 
 class Settings:
@@ -29,6 +29,9 @@ class Settings:
         self.loading_window = ConfirmationPopup(self.app)
         self.loading_window.withdraw()
 
+        self.edit_sessings_window = EditSettings(self.app)
+        self.edit_sessings_window.protocol("WM_DELETE_WINDOW", self.close_settings_popup)
+
     def open_folder(self):
         self.app.check_path()
         os.startfile(os.path.realpath(self.app.lib_path))
@@ -39,5 +42,12 @@ class Settings:
         self.loading_window.deiconify()
 
     def edit_settings(self):
-        if os.path.exists(self.app.path + "\\lib\\game_settings.ahk"):
-            subprocess.Popen(["Notepad.exe", self.app.path+"\\lib\\game_settings.ahk"])
+        self.edit_sessings_window.geometry(f"+{self.app.winfo_rootx() + 300}+{self.app.winfo_rooty()}")
+        self.edit_sessings_window.deiconify()
+        self.edit_sessings_window.grab_set()
+        # if os.path.exists(self.app.path + "\\lib\\game_settings.ahk"):
+        # subprocess.Popen(["Notepad.exe", self.app.path+"\\lib\\game_settings.ahk"])
+
+    def close_settings_popup(self):
+        self.edit_sessings_window.grab_release()
+        self.edit_sessings_window.withdraw()

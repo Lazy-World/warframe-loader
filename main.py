@@ -53,7 +53,7 @@ class App(customtkinter.CTk):
         self.lib_path = self.path + "\\lib"
         self.ahk = None
         self.online_version = get_online_version()
-        self.version = "3.0"
+        self.version = "3.0.1"
         self.json_settings = {}
         self.scrollable_frame_switches = None
         self.scrollable_frame = None
@@ -145,7 +145,7 @@ class App(customtkinter.CTk):
 
     def loading_finished(self):
         self.loading_window.grab_release()
-        self.loading_window.destroy()
+        self.loading_window.withdraw()
         self.set_appearance()
 
     def close_update_popup(self):
