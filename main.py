@@ -53,11 +53,12 @@ class App(customtkinter.CTk):
         self.lib_path = self.path + "\\lib"
         self.ahk = None
         self.online_version = get_online_version()
-        self.version = "3.0.1"
+        self.version = "3.0.2"
         self.json_settings = {}
         self.scrollable_frame_switches = None
         self.scrollable_frame = None
         self.geometry(f"{750}x{400}")
+        self.minsize(width=750, height=400)
         self.title("LazyHub")
         # set grid layout 1x2
         self.grid_rowconfigure(0, weight=1)
@@ -190,8 +191,10 @@ class App(customtkinter.CTk):
             self.update_window.updates_frame_2.grid_forget()
         if name == "settings":
             self.settings_window.settings_frame_1.grid(row=0, column=1, sticky="nsew")
+            self.settings_window.settings_frame_2.grid(row=0, column=2, sticky="nsew")
         else:
             self.settings_window.settings_frame_1.grid_forget()
+            self.settings_window.settings_frame_2.grid_forget()
 
     def active_scripts_button_event(self):
         self.select_frame_by_name("active_scripts")

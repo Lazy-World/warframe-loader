@@ -16,6 +16,7 @@ class ActiveScripts:
 
         self.active_scripts_frame_1 = customtkinter.CTkFrame(self.app, corner_radius=0, fg_color="transparent")
         self.active_scripts_frame_1.grid_columnconfigure(0, weight=1)
+        self.active_scripts_frame_1.grid_rowconfigure(0, weight=1)
 
         self.active_scripts_frame_2 = customtkinter.CTkFrame(self.app, corner_radius=0, fg_color="transparent")
         self.active_scripts_frame_2.grid_columnconfigure(0, weight=1)
@@ -50,7 +51,7 @@ class ActiveScripts:
 
         self.path_label = customtkinter.CTkLabel(self.active_scripts_frame_1,
                                                  text="AutoHotkey.exe path: ")
-        self.path_label.grid(row=3, column=0, padx=20, pady=20)
+        self.path_label.grid(row=3, column=0, padx=20, pady=20, sticky="w")
 
     def open_folder(self):
         self.app.check_path()

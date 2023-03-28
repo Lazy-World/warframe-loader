@@ -12,6 +12,7 @@ class Workshop:
 
         self.workshop_frame_1 = customtkinter.CTkFrame(self.app, corner_radius=0, fg_color="transparent")
         self.workshop_frame_1.grid_columnconfigure(0, weight=1)
+        self.workshop_frame_1.grid_rowconfigure(0, weight=1)
 
         self.workshop_frame_2 = customtkinter.CTkFrame(self.app, corner_radius=0, fg_color="transparent")
         self.workshop_frame_2.grid_columnconfigure(0, weight=1)
@@ -23,7 +24,7 @@ class Workshop:
 
         self.ws_load_button = customtkinter.CTkButton(self.workshop_frame_1, text="Download Selected Items",
                                                       command=self.download_workshop)
-        self.ws_load_button.grid(row=1, column=0, padx=(20, 10), pady=(10, 0), sticky="nsew")
+        self.ws_load_button.grid(row=1, column=0, padx=(20, 10), pady=(10, 10), sticky="nsew")
 
         self.ws_explorer_button = customtkinter.CTkButton(self.workshop_frame_2, text="Open Folder",
                                                           command=self.open_folder)
@@ -67,14 +68,14 @@ class Workshop:
             script = requests.get(f"https://raw.githubusercontent.com/Lazy-World/warframe-ahk/main/{name}").content\
                 .decode("utf-8")
             if name in active_scripts:
-                color = "#ffff00"
+                color = "#f2ba38"
             else:
                 color = "#000000"
             for ahk in active_scripts:
                 with open(self.app.workshop_path+"\\"+ahk, "r") as file:
                     local_script = file.read()
                 if local_script == script:
-                    color = "#00ff00"
+                    color = "#31dea4"
                     break
             switch = customtkinter.CTkCheckBox(master=self.ws_script_list, text=name, border_color=color)
             switch.grid(row=i, column=0, padx=10, pady=(0, 20), sticky="nsew")

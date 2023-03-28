@@ -32,6 +32,9 @@ class ConfirmationPopup(CTkToplevel):
         r = requests.get("https://raw.githubusercontent.com/Lazy-World/warframe-ahk/main/libraries/game_settings.ahk")
         with open(filename, 'wb') as f:
             f.write(r.content)
+        for child in self.main_app.settings_window.items_list.winfo_children():
+            child.destroy()
+        self.main_app.settings_window.generate_settings()
         self.withdraw()
         self.grab_release()
 
