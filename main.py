@@ -42,7 +42,8 @@ customtkinter.set_default_color_theme("green")  # Themes: "blue" (standard), "gr
 def get_online_version():
     answer = requests.get(
         "https://raw.githubusercontent.com/Lazy-World/warframe-ahk/LazyHub/LazyHub/latest.txt").content
-    return answer.decode("utf-8")
+    print(answer.decode("utf-8"))
+    return answer.decode("utf-8")[:-1]
 
 
 class App(customtkinter.CTk):
@@ -63,6 +64,7 @@ class App(customtkinter.CTk):
         # set grid layout 1x2
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(1, weight=1)
+        self.check_path()
 
         self.iconbitmap("cat.ico")
         # elements
@@ -210,9 +212,9 @@ class App(customtkinter.CTk):
 
     def check_path(self):
         if not os.path.exists(self.path + "\\lib"):
-            os.mkdir(self.path + "\\lib")
+            os.makedirs(self.path + "\\lib")
         if not os.path.exists(self.path + "\\workshop"):
-            os.mkdir(self.path + "\\workshop")
+            os.makedirs(self.path + "\\workshop")
 
     def open_path(self, event):
         if self.ahk is not None:
@@ -245,5 +247,4 @@ class App(customtkinter.CTk):
 if __name__ == "__main__":
     app = App()
     app.update()
-    app.check_path()
     app.mainloop()
