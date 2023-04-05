@@ -50,7 +50,7 @@ class Update:
         answer = requests.get("https://api.github.com/repos/Lazy-World/warframe-ahk/contents/libraries").content
         json_answer = json.loads(answer.decode("utf-8"))
         for item in json_answer:
-            if item["name"] != "game_settings.ahk":
+            if item["name"] != "game_settings.ahk" or item["name"] != "key_decode.ahk":
                 filename = self.app.path+"\\lib\\" + item["name"]
                 r = requests.get(item["download_url"])
                 with open(filename, 'wb') as f:

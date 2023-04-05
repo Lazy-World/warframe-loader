@@ -28,6 +28,7 @@ import threading
 import customtkinter
 import os
 import requests
+from PIL import Image
 
 from Elements.ActiveScripts import ActiveScripts
 from Elements.Workshop import Workshop
@@ -42,7 +43,6 @@ customtkinter.set_default_color_theme("green")  # Themes: "blue" (standard), "gr
 def get_online_version():
     answer = requests.get(
         "https://raw.githubusercontent.com/Lazy-World/warframe-ahk/LazyHub/LazyHub/latest.txt").content
-    print(answer.decode("utf-8"))
     return answer.decode("utf-8")[:-1]
 
 
@@ -54,7 +54,7 @@ class App(customtkinter.CTk):
         self.lib_path = self.path + "\\lib"
         self.ahk = None
         self.online_version = get_online_version()
-        self.version = "3.0.2"
+        self.version = "3.0.3"
         self.json_settings = {}
         self.scrollable_frame_switches = None
         self.scrollable_frame = None
@@ -64,6 +64,7 @@ class App(customtkinter.CTk):
         # set grid layout 1x2
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(1, weight=1)
+        img = customtkinter.CTkImage(Image.open("cat.ico"))
         self.check_path()
 
         self.iconbitmap("cat.ico")
@@ -79,7 +80,7 @@ class App(customtkinter.CTk):
         self.navigation_frame.grid_rowconfigure(5, weight=1)
 
         self.navigation_frame_label = customtkinter.CTkLabel(
-            self.navigation_frame, text="LazyHub v" + self.version, compound="left",
+            self.navigation_frame, text="LazyHub v" + self.version, compound="left", image=img,
             font=customtkinter.CTkFont(size=15, weight="bold")
         )
         self.navigation_frame_label.grid(row=0, column=0, padx=20, pady=20)
@@ -191,7 +192,7 @@ class App(customtkinter.CTk):
         else:
             self.update_window.updates_frame_1.grid_forget()
             self.update_window.updates_frame_2.grid_forget()
-        if name == "settings":
+        if name == "game_settings":
             self.settings_window.settings_frame_1.grid(row=0, column=1, sticky="nsew")
             self.settings_window.settings_frame_2.grid(row=0, column=2, sticky="nsew")
         else:
@@ -208,7 +209,7 @@ class App(customtkinter.CTk):
         self.select_frame_by_name("updates")
 
     def settings_button_event(self):
-        self.select_frame_by_name("settings")
+        self.select_frame_by_name("game_settings")
 
     def check_path(self):
         if not os.path.exists(self.path + "\\lib"):

@@ -25,13 +25,17 @@ class ActiveScripts:
         self.as_script_list.grid(row=0, column=0, padx=(20, 10), pady=(10, 0), sticky="nsew")
         self.scrollable_frame_switches = []
 
+        self.path_label = customtkinter.CTkLabel(self.active_scripts_frame_1, text="AutoHotkey.exe path: ")
+
+        self.path_label.grid(row=1, column=0, padx=20, pady=(10, 0), sticky="w")
+
         self.as_load_button = customtkinter.CTkButton(self.active_scripts_frame_1, text="Load Selected Items",
                                                       command=self.load_script)
-        self.as_load_button.grid(row=1, column=0, padx=(20, 10), pady=(10, 0), sticky="nsew")
+        self.as_load_button.grid(row=2, column=0, padx=(20, 10), pady=(10, 0), sticky="nsew")
 
         self.as_delete_button = customtkinter.CTkButton(self.active_scripts_frame_1, text="Delete Selected Items",
                                                         command=self.delete_script)
-        self.as_delete_button.grid(row=2, column=0, padx=(20, 10), pady=(10, 0), sticky="nsew")
+        self.as_delete_button.grid(row=3, column=0, padx=(20, 10), pady=20, sticky="nsew")
 
         self.as_explorer_button = customtkinter.CTkButton(self.active_scripts_frame_2, text="Open Folder",
                                                           command=self.open_folder)
@@ -48,10 +52,6 @@ class ActiveScripts:
         self.as_editpath_button = customtkinter.CTkButton(self.active_scripts_frame_2, text="Edit Ahk Path",
                                                           command=self.edit_path)
         self.as_editpath_button.grid(row=3, column=1, padx=(10, 20), pady=(10, 0), sticky="nsew")
-
-        self.path_label = customtkinter.CTkLabel(self.active_scripts_frame_1,
-                                                 text="AutoHotkey.exe path: ")
-        self.path_label.grid(row=3, column=0, padx=20, pady=20, sticky="w")
 
     def open_folder(self):
         self.app.check_path()

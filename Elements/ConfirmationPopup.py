@@ -28,10 +28,14 @@ class ConfirmationPopup(CTkToplevel):
 
     def confirm(self):
         self.main_app.check_path()
-        filename = self.main_app.path + "\\lib\\game_settings.ahk"
-        r = requests.get("https://raw.githubusercontent.com/Lazy-World/warframe-ahk/main/libraries/game_settings.ahk")
-        with open(filename, 'wb') as f:
-            f.write(r.content)
+        settings = self.main_app.path + "\\lib\\game_settings.ahk"
+        key_decode = self.main_app.path + "\\lib\\key_decode.ahk"
+        r1 = requests.get("https://raw.githubusercontent.com/Lazy-World/warframe-ahk/main/libraries/game_settings.ahk")
+        with open(settings, 'wb') as f:
+            f.write(r1.content)
+        r2 = requests.get("https://raw.githubusercontent.com/Lazy-World/warframe-ahk/main/libraries/key_decode.ahk")
+        with open(key_decode, 'wb') as f:
+            f.write(r2.content)
         for child in self.main_app.settings_window.items_list.winfo_children():
             child.destroy()
         self.main_app.settings_window.generate_settings()

@@ -1,5 +1,7 @@
 import json
 import os
+import tkinter
+
 import customtkinter
 import requests as requests
 
@@ -69,14 +71,21 @@ class Workshop:
                 .decode("utf-8")
             if name in active_scripts:
                 color = "#f2ba38"
+                active = tkinter.IntVar(value=1)
             else:
                 color = "#000000"
+                active = tkinter.IntVar(value=0)
             for ahk in active_scripts:
                 with open(self.app.workshop_path+"\\"+ahk, "r") as file:
                     local_script = file.read()
                 if local_script == script:
                     color = "#31dea4"
+                    active = tkinter.IntVar(value=1)
                     break
-            switch = customtkinter.CTkCheckBox(master=self.ws_script_list, text=name, border_color=color)
+            switch_color = "#31dea4"
+            if color == "#f2ba38":
+                switch_color = "#f2ba38"
+            switch = customtkinter.CTkCheckBox(master=self.ws_script_list, text=name, border_color=color,
+                                               variable=active, fg_color=switch_color)
             switch.grid(row=i, column=0, padx=10, pady=(0, 20), sticky="nsew")
             self.scrollable_frame_switches_2.append(switch)

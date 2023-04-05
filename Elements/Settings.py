@@ -1,10 +1,11 @@
 import os
 import tkinter
 import webbrowser
-
 import customtkinter
+import win32api
 
 from Elements.ConfirmationPopup import ConfirmationPopup
+from Elements.KeyBind import KeyBind
 
 
 class Settings:
@@ -23,23 +24,7 @@ class Settings:
 
         self.save_button = customtkinter.CTkButton(self.settings_frame_1, text="Save changes", state="disabled",
                                                    command=self.save)
-        self.save_button.grid(row=1, column=0, padx=(20, 10), pady=(10, 0), columnspan=2, sticky="nsew")
-
-        self.label_1 = customtkinter.CTkLabel(self.settings_frame_1, text="AHK key names:")
-        self.label_1.grid(row=2, column=0, padx=(20, 10), pady=(10, 0), sticky="w")
-
-        self.label_2 = customtkinter.CTkLabel(self.settings_frame_1,
-                                              text="https://www.autohotkey.com/docs/v1/KeyList.htm",
-                                              cursor="hand2")
-        self.label_2.grid(row=3, column=0, padx=(20, 10), sticky="w")
-
-        self.label_3 = customtkinter.CTkLabel(self.settings_frame_1,
-                                              text="https://www.autohotkey.com/docs/v1/Hotkeys.htm",
-                                              cursor="hand2")
-        self.label_3.grid(row=4, column=0, padx=(20, 10), sticky="w")
-
-        self.label_2.bind("<Button-1>", lambda x: webbrowser.open(self.label_2.cget("text")))
-        self.label_3.bind("<Button-1>", lambda x: webbrowser.open(self.label_3.cget("text")))
+        self.save_button.grid(row=1, column=0, padx=(20, 10), pady=(10, 10), columnspan=2, sticky="nsew")
 
         self.upd_settings_button = customtkinter.CTkButton(self.settings_frame_2, text="Update game settings",
                                                            command=self.update_libs)
@@ -54,6 +39,8 @@ class Settings:
 
         self.confirm_window = ConfirmationPopup(self.app)
         self.confirm_window.withdraw()
+
+        self.keybind_window = KeyBind(self.app)
 
     def generate_settings(self):
         self.lines = None
@@ -76,10 +63,13 @@ class Settings:
                     label = customtkinter.CTkLabel(self.items_list, text=line[line.rfind(";") + 1:])
                     label.grid(row=i, column=0, pady=5, sticky="w")
                     placeholder = tkinter.StringVar(value=line[line.find("=") + 1:line.rfind(";")].replace(" ", ""))
-                    placeholder.trace("w", lambda x, y, z: self.text_callback())
-                    dialog = customtkinter.CTkEntry(self.items_list, textvariable=placeholder,
+                    dialog = customtkinter.CTkEntry(self.items_list, textvariable=placeholder, state="disabled",
                                                     placeholder_text=label.cget("text"))
-
+                    if dialog.cget("placeholder_text").replace(" ", "").replace("\n", "") == "Averageingamefps":
+                        dialog.configure(state="normal")
+                        placeholder.trace("w", lambda x, y, z: self.text_callback())
+                    else:
+                        dialog.bind("<Button-1>", lambda event, d=dialog: self.key_bind(event, d))
                     dialog.grid(row=i, column=1, padx=50, pady=5)
                     self.changes.append(dialog)
 
@@ -114,3 +104,12 @@ class Settings:
 
     def text_callback(self):
         self.save_button.configure(state="normal")
+
+    def key_bind(self, event, element):
+        win32api.LoadKeyboardLayout('00000409', 1)
+        self.keybind_window.geometry(f"+{self.app.winfo_rootx()+300}+{self.app.winfo_rooty()}")
+        self.keybind_window.deiconify()
+        self.keybind_window.grab_set()
+        self.keybind_window.bind("<KeyPress>", lambda ev, el=element: self.keybind_window.key_bind(ev, el))
+        self.keybind_window.bind("<ButtonPress>", lambda ev, el=element: self.keybind_window.mouse_bind(ev, el))
+        self.keybind_window.bind("<MouseWheel>", lambda ev, el=element: self.keybind_window.mouse_wheel_bind(ev, el))
