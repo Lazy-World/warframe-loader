@@ -7,7 +7,7 @@ class NoUpdatesRequired(CTkToplevel):
         super().__init__()
         self.geometry("180x80")
         self.title("LazyHub")
-        self.iconbitmap("cat.ico")
+        self.iconbitmap("assets\\cat.ico")
         self.withdraw()
         self.resizable(width=False, height=False)
 

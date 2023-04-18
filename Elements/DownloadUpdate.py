@@ -25,7 +25,7 @@ class DownloadWindow(CTkToplevel):
         self.geometry("260x150")
         self.main_app = app
         self.title("LazyHub")
-        self.iconbitmap("cat.ico")
+        self.iconbitmap("assets\\cat.ico")
         self.grab_set()
         self.downloads = get_download_path()
         self.geometry(f"+{app.winfo_rootx() + 500}+{app.winfo_rooty()}")

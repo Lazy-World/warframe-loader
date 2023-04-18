@@ -1,6 +1,5 @@
 import os
 import tkinter
-import webbrowser
 import customtkinter
 import win32api
 
@@ -22,13 +21,19 @@ class Settings:
         self.items_list.grid(row=0, column=0, padx=(20, 10), pady=(10, 0), sticky="nsew", columnspan=2)
         self.changes = []
 
-        self.save_button = customtkinter.CTkButton(self.settings_frame_1, text="Save changes", state="disabled",
+        self.save_button = customtkinter.CTkButton(self.settings_frame_1, text="Save changes",
                                                    command=self.save)
         self.save_button.grid(row=1, column=0, padx=(20, 10), pady=(10, 10), columnspan=2, sticky="nsew")
 
         self.upd_settings_button = customtkinter.CTkButton(self.settings_frame_2, text="Update game settings",
                                                            command=self.update_libs)
         self.upd_settings_button.grid(row=0, column=0, padx=(20, 20), pady=(10, 0), sticky="nsew")
+
+        self.upd_settings_button_processing = customtkinter.CTkButton(self.settings_frame_2, state="disabled",
+                                                                      text="Processing...",
+                                                                      image=tkinter.PhotoImage(
+                                                                          file="assets\\loading.gif",
+                                                                          format=f"gif -index {0}"))
 
         self.open_folder_button = customtkinter.CTkButton(self.settings_frame_2, text="Open Folder",
                                                           command=self.open_folder)
@@ -107,7 +112,7 @@ class Settings:
 
     def key_bind(self, event, element):
         win32api.LoadKeyboardLayout('00000409', 1)
-        self.keybind_window.geometry(f"+{self.app.winfo_rootx()+300}+{self.app.winfo_rooty()}")
+        self.keybind_window.geometry(f"+{self.app.winfo_rootx() + 300}+{self.app.winfo_rooty()}")
         self.keybind_window.deiconify()
         self.keybind_window.grab_set()
         self.keybind_window.bind("<KeyPress>", lambda ev, el=element: self.keybind_window.key_bind(ev, el))

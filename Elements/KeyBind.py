@@ -12,7 +12,7 @@ class KeyBind(CTkToplevel):
         self.app = app
         self.geometry("150x150")
         self.title("LazyHub")
-        self.iconbitmap("cat.ico")
+        self.iconbitmap("assets\\cat.ico")
         self.resizable(width=False, height=False)
         self.withdraw()
 
@@ -38,10 +38,10 @@ class KeyBind(CTkToplevel):
         element.configure(textvariable=placeholder)
         self.grab_release()
         self.withdraw()
-        self.app.settings_window.save_button.configure(state="normal")
 
     def key_bind(self, event, element):
-        key = subprocess.check_output([self.app.ahk, self.app.lib_path+"\\key_decode.ahk", f'{event.keycode}']).decode("utf-8")
+        key = subprocess.check_output([self.app.ahk, self.app.lib_path+"\\key_decode.ahk", f'{event.keycode}'])\
+            .decode("utf-8")
         if element.cget("textvariable").get() == key:
             self.grab_release()
             self.withdraw()
@@ -50,7 +50,6 @@ class KeyBind(CTkToplevel):
         element.configure(textvariable=placeholder)
         self.grab_release()
         self.withdraw()
-        self.app.settings_window.save_button.configure(state="normal")
 
     def mouse_wheel_bind(self, event, element):
         key = None
@@ -66,7 +65,6 @@ class KeyBind(CTkToplevel):
         element.configure(textvariable=placeholder)
         self.grab_release()
         self.withdraw()
-        self.app.settings_window.save_button.configure(state="normal")
 
     def close(self):
         self.grab_release()

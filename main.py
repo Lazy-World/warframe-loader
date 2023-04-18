@@ -25,6 +25,8 @@ from customtkinter import *
 import getpass
 import json
 import threading
+import tkinter
+from itertools import cycle
 import customtkinter
 import os
 import requests
@@ -54,7 +56,7 @@ class App(customtkinter.CTk):
         self.lib_path = self.path + "\\lib"
         self.ahk = None
         self.online_version = get_online_version()
-        self.version = "3.0.3"
+        self.version = "3.0.4"
         self.json_settings = {}
         self.scrollable_frame_switches = None
         self.scrollable_frame = None
@@ -64,13 +66,13 @@ class App(customtkinter.CTk):
         # set grid layout 1x2
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(1, weight=1)
-        img = customtkinter.CTkImage(Image.open("cat.ico"))
+        self.img = customtkinter.CTkImage(Image.open("assets\\cat.png"), size=(30, 30))
         self.check_path()
 
-        self.iconbitmap("cat.ico")
+        self.iconbitmap("assets\\cat.ico")
         # elements
         self.tab_groups = []
-        self.tab_groups_names = ["active_scripts", "workshop", "updates", "game_settings"]
+        self.tab_groups_names = ["active_scripts", "workshop", "game_settings", "updates"]
         self.tab_elements = []
         #################################
         # Navigation
@@ -80,16 +82,19 @@ class App(customtkinter.CTk):
         self.navigation_frame.grid_rowconfigure(5, weight=1)
 
         self.navigation_frame_label = customtkinter.CTkLabel(
-            self.navigation_frame, text="LazyHub v" + self.version, compound="left", image=img,
+            self.navigation_frame, text="LazyHub v" + self.version, anchor="s",
             font=customtkinter.CTkFont(size=15, weight="bold")
         )
-        self.navigation_frame_label.grid(row=0, column=0, padx=20, pady=20)
+        self.navigation_frame_label.grid(row=0, column=1, padx=(0, 10), pady=20)
+
+        self.img_frame = customtkinter.CTkLabel(self.navigation_frame, text="", image=self.img, compound="center")
+        self.img_frame.grid(row=0, column=0, padx=0, pady=20)
 
         self.buttons = [
             {"text": "Your Scripts", "command": self.active_scripts_button_event},
             {"text": "Workshop", "command": self.workshop_button_event},
-            {"text": "Updates", "command": self.updates_button_event},
-            {"text": "Game Settings", "command": self.settings_button_event}
+            {"text": "Game Settings", "command": self.settings_button_event},
+            {"text": "Updates", "command": self.updates_button_event}
         ]
 
         for i, button_data in enumerate(self.buttons):
@@ -98,14 +103,20 @@ class App(customtkinter.CTk):
                 text=button_data["text"], fg_color="transparent", text_color=("gray10", "gray90"),
                 hover_color=("gray70", "gray30"), anchor="w", command=button_data["command"]
             ))
-            self.tab_groups[i].grid(row=i + 1, column=0, sticky="ew")
+            self.tab_groups[i].grid(row=i + 1, column=0, sticky="ew", columnspan=2)
 
         # Settings
         self.appearance_mode_menu = customtkinter.CTkOptionMenu(
             self.navigation_frame, values=["Light", "Dark", "System"], command=self.change_appearance_mode_event
         )
-        self.appearance_mode_menu.grid(row=6, column=0, padx=20, pady=(10, 10))
+        self.appearance_mode_menu.grid(row=6, column=0, padx=10, pady=(10, 10), columnspan=2)
 
+        self.reload_button_icon_anim = []
+        for i in range(0, 30):
+            self.reload_button_icon_anim.append(tkinter.PhotoImage(file="assets\\loading.gif",
+                                                                   format=f"gif -index {i}"))
+
+        self.reload_button_icon_anim = cycle(self.reload_button_icon_anim)
         #################################
         # Your Scripts Frame
         #################################
@@ -176,7 +187,6 @@ class App(customtkinter.CTk):
         if name == "active_scripts":
             self.active_scripts_window.active_scripts_frame_1.grid(row=0, column=1, sticky="nsew")
             self.active_scripts_window.active_scripts_frame_2.grid(row=0, column=2, sticky="nsew")
-            self.active_scripts_window.refresh()
         else:
             self.active_scripts_window.active_scripts_frame_1.grid_forget()
             self.active_scripts_window.active_scripts_frame_2.grid_forget()
@@ -186,18 +196,18 @@ class App(customtkinter.CTk):
         else:
             self.workshop_window.workshop_frame_1.grid_forget()
             self.workshop_window.workshop_frame_2.grid_forget()
-        if name == "updates":
-            self.update_window.updates_frame_1.grid(row=0, column=1, sticky="nsew")
-            self.update_window.updates_frame_2.grid(row=0, column=2, sticky="nsew")
-        else:
-            self.update_window.updates_frame_1.grid_forget()
-            self.update_window.updates_frame_2.grid_forget()
         if name == "game_settings":
             self.settings_window.settings_frame_1.grid(row=0, column=1, sticky="nsew")
             self.settings_window.settings_frame_2.grid(row=0, column=2, sticky="nsew")
         else:
             self.settings_window.settings_frame_1.grid_forget()
             self.settings_window.settings_frame_2.grid_forget()
+        if name == "updates":
+            self.update_window.updates_frame_1.grid(row=0, column=1, sticky="nsew")
+            self.update_window.updates_frame_2.grid(row=0, column=2, sticky="nsew")
+        else:
+            self.update_window.updates_frame_1.grid_forget()
+            self.update_window.updates_frame_2.grid_forget()
 
     def active_scripts_button_event(self):
         self.select_frame_by_name("active_scripts")
@@ -216,6 +226,8 @@ class App(customtkinter.CTk):
             os.makedirs(self.path + "\\lib")
         if not os.path.exists(self.path + "\\workshop"):
             os.makedirs(self.path + "\\workshop")
+        if not os.path.exists(self.path + "\\workshop\\settings"):
+            os.makedirs(self.path + "\\workshop\\settings")
 
     def open_path(self, event):
         if self.ahk is not None:
@@ -248,4 +260,5 @@ class App(customtkinter.CTk):
 if __name__ == "__main__":
     app = App()
     app.update()
+    app.active_scripts_window.refresh()
     app.mainloop()

@@ -8,7 +8,7 @@ class UpdatePopup(CTkToplevel):
         self.geometry("250x80")
         self.title("LazyHub")
         self.geometry(f"+{app.winfo_rootx()}+{app.winfo_rooty()}")
-        self.iconbitmap("cat.ico")
+        self.iconbitmap("assets\\cat.ico")
         self.withdraw()
         self.resizable(width=False, height=False)
 

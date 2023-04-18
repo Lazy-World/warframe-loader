@@ -30,7 +30,7 @@ class AhkLoadingWindow(CTkToplevel):
 
         self.path = 'C:\\Users\\%s\\AppData\\Roaming\\LazyHub' % getpass.getuser()
         self.main_app = main_app
-        self.iconbitmap("cat.ico")
+        self.iconbitmap("assets\\cat.ico")
 
     def generate_ini(self):
         if not os.path.exists(self.path):
