@@ -24,16 +24,14 @@ class Workshop:
         self.ws_script_list.grid(row=0, column=0, padx=(20, 10), pady=(10, 0), sticky="nsew")
 
         self.scrollable_frame_switches_2 = []
-
+        self.image = tkinter.PhotoImage(file="assets\\loading.gif", format=f"gif -index {0}")
         self.ws_load_button = customtkinter.CTkButton(self.workshop_frame_1, text="Download Selected Items",
                                                       command=self.download_workshop_event)
         self.ws_load_button.grid(row=1, column=0, padx=(20, 10), pady=(10, 0), sticky="nsew")
 
         self.ws_load_button_processing = customtkinter.CTkButton(self.workshop_frame_1, state="disabled",
                                                                  text="Processing...",
-                                                                 image=tkinter.PhotoImage(
-                                                                     file="assets\\loading.gif",
-                                                                     format=f"gif -index {0}"))
+                                                                 image=self.image)
 
         self.ws_load_cfg_button = customtkinter.CTkButton(self.workshop_frame_1, text="Download Selected Items Сonfigs",
                                                           command=self.download_cfg_event)
@@ -41,9 +39,7 @@ class Workshop:
 
         self.ws_load_cfg_button_processing = customtkinter.CTkButton(self.workshop_frame_1, state="disabled",
                                                                      text="Processing...",
-                                                                     image=tkinter.PhotoImage(
-                                                                         file="assets\\loading.gif",
-                                                                         format=f"gif -index {0}"))
+                                                                     image=self.image)
 
         self.ws_explorer_button = customtkinter.CTkButton(self.workshop_frame_2, text="Open Folder",
                                                           command=self.open_folder)
@@ -55,9 +51,7 @@ class Workshop:
 
         self.ws_refresh_button_processing = customtkinter.CTkButton(self.workshop_frame_2, state="disabled",
                                                                     text="Processing...",
-                                                                    image=tkinter.PhotoImage(
-                                                                        file="assets\\loading.gif",
-                                                                        format=f"gif -index {0}"))
+                                                                    image=self.image)
         # self.refresh()
 
     def open_folder(self):
@@ -89,6 +83,7 @@ class Workshop:
                 r = requests.get(self.scripts[switch.cget("text")])
                 with open(filename, 'wb') as f:
                     f.write(r.content)
+                switch.configure(border_color="#31dea4", fg_color="#31dea4")
 
         self.condition = True
         self.ws_refresh_button.configure(state="normal")
@@ -110,7 +105,7 @@ class Workshop:
         self.app.check_path()
         for switch in self.scrollable_frame_switches_2:
             if switch.get() == 1:
-                cfg = self.app.workshop_path + "\\settings\\cfg_" + switch.cget("text")
+                cfg = self.app.settings_path + "\\cfg_" + switch.cget("text")
                 rq = requests.get(f"https://raw.githubusercontent.com/Lazy-World/warframe-ahk/main/settings/"
                                   f"{'cfg_'+switch.cget('text')}")
                 with open(cfg, 'wb') as f:

@@ -10,11 +10,13 @@ from tkinter.filedialog import askopenfilename
 import customtkinter
 import os
 
-from Elements.KeyBind import KeyBind
+mouse_keys = {1: "LButton", 3: "RButton", 2: "MButton", 4: "XButton1", 5: "XButton2"}
 
 
 class ActiveScripts:
     def __init__(self, app):
+        self.value_chosen = None
+        self.binding = False
         self.lines = []
         self.changes = []
         self.app = app
@@ -67,14 +69,15 @@ class ActiveScripts:
                                                           command=self.edit_path)
         self.as_editpath_button.grid(row=3, column=1, padx=(10, 20), pady=(10, 0), sticky="nsew")
 
-        self.keybind_window = KeyBind(self.app)
+        self.configure = customtkinter.CTkImage(Image.open("assets\\configure.png"), size=(30, 30))
+        self.configure_2 = customtkinter.CTkImage(Image.open("assets\\configure_2.png"), size=(30, 30))
 
     def open_folder(self):
         self.app.check_path()
         os.startfile(os.path.realpath(self.app.workshop_path))
 
     def save_cfg(self):
-        cfg = self.app.workshop_path + "\\settings\\" + self.current_cfg
+        cfg = self.app.settings_path+"\\" + self.current_cfg
         result = []
         with open(cfg, "r") as f:
             file = f.readlines()
@@ -91,10 +94,16 @@ class ActiveScripts:
                 for line in file:
                     if change[0] in line:
                         if type(change[1]) is list:
-                            line = line[:line.find("=") + 2] + json.dumps(change[1]) + " " + line[line.rfind(";"):]
-                            print(line)
-                            result.append(line)
-                            break
+                            if type(change[1][0]) is customtkinter.StringVar:
+                                line = line[:line.find("=") + 2] \
+                                       + str([int(change[1][0].get()), int(change[1][1].get())]) \
+                                       + " " + line[line.rfind(";"):]
+                                result.append(line)
+                                break
+                            else:
+                                line = line[:line.find("=") + 2] + json.dumps(change[1]) + " " + line[line.rfind(";"):]
+                                result.append(line)
+                                break
                         elif type(change[1]) is customtkinter.StringVar:
                             line = line[:line.find("=") + 2] + change[1].get() + " " + line[line.rfind(";"):]
                             result.append(line)
@@ -104,16 +113,20 @@ class ActiveScripts:
         self.cfg_back()
 
     def cfg_back(self):
+        self.as_script_list.destroy()
+        self.as_script_list = customtkinter.CTkScrollableFrame(self.active_scripts_frame_1, label_text="Your Scripts")
+        self.as_script_list.grid(row=0, column=0, padx=(20, 10), pady=(10, 0), sticky="nsew")
         self.as_delete_button.grid(row=3, column=0, padx=(20, 10), pady=(10, 10), sticky="nsew")
         self.as_load_button.grid(row=2, column=0, padx=(20, 10), pady=(10, 0), sticky="nsew")
         self.cfg_save_button.grid_forget()
         self.back_button.grid_forget()
         self.current_cfg = None
+        self.as_script_list.configure(label_text="Your Scripts")
         self.refresh()
 
     def get_names(self):
         return [f for f in listdir(self.app.workshop_path) if
-                isfile(join(self.app.workshop_path, f))]
+                isfile(join(self.app.workshop_path, f)) and f != "hub.ini"]
 
     def refresh(self):
         if self.scrollable_frame_switches:
@@ -125,19 +138,19 @@ class ActiveScripts:
             switch = customtkinter.CTkCheckBox(master=self.as_script_list, text=name)
             switch.grid(row=i, column=0, padx=10, pady=(0, 20), sticky="nsew")
             switch_label = customtkinter. \
-                CTkLabel(master=self.as_script_list, text="",
-                         image=customtkinter.CTkImage(light_image=Image.open("assets\\configure.png"),
-                                                      dark_image=Image.open("assets\\configure.png"),
-                                                      size=(30, 30)))
+                CTkLabel(master=self.as_script_list, text="", image=self.configure)
             switch_label.grid(row=i, column=1, padx=10, pady=(0, 20), sticky="nsew")
             switch_label.bind("<Button-1>", lambda event, script="cfg_" + name: self.configure_script(script))
+            switch_label.bind("<Enter>", lambda event, sw=switch_label: sw.configure(image=self.configure_2))
+            switch_label.bind("<Leave>", lambda event, sw=switch_label: sw.configure(image=self.configure))
             self.scrollable_frame_switches.append(switch)
             self.scrollable_frame_labels.append(switch_label)
 
     def configure_script(self, script):
         self.current_cfg = script
-        for child in self.as_script_list.winfo_children():
-            child.grid_forget()
+        self.as_script_list.destroy()
+        self.as_script_list = customtkinter.CTkScrollableFrame(self.active_scripts_frame_1, label_text=script[4:])
+        self.as_script_list.grid(row=0, column=0, padx=(20, 10), pady=(10, 0), sticky="nsew")
         self.as_delete_button.grid_forget()
         self.as_load_button.grid_forget()
         self.cfg_save_button.grid(row=2, column=0, padx=(20, 10), pady=(10, 0), sticky="nsew")
@@ -146,7 +159,7 @@ class ActiveScripts:
         self.lines = []
         self.changes = []
         action = None
-        cfg = self.app.workshop_path + "\\settings\\" + script
+        cfg = self.app.settings_path + "\\" + script
         if os.path.isfile(cfg):
             with open(cfg, "r") as file:
                 self.lines = file.readlines()
@@ -171,6 +184,20 @@ class ActiveScripts:
                     self.changes.append(line)
                     action = "Value"
                     continue
+                elif "@MouseMove" in line:
+                    self.changes.append(line)
+                    action = "MouseMove"
+                    continue
+                elif "@Tab" in line:
+                    self.changes.append(line)
+                    action = "Tab"
+                    continue
+                elif "@Title" in line:
+                    self.changes.append(line)
+                    label = customtkinter.CTkLabel(self.as_script_list, text=line[8:],
+                                                   font=customtkinter.CTkFont(weight="bold"))
+                    label.grid(row=i, column=0, pady=5, sticky="nsew", columnspan=3)
+                    continue
                 if action == "Bind":
                     label = customtkinter.CTkLabel(self.as_script_list, text=line[line.rfind(";") + 1:])
                     label.grid(row=i, column=0, pady=5, sticky="w")
@@ -178,7 +205,7 @@ class ActiveScripts:
                     dialog = customtkinter.CTkEntry(self.as_script_list, textvariable=placeholder, state="disabled",
                                                     placeholder_text=label.cget("text"))
                     dialog.bind("<Button-1>", lambda event, d=dialog: self.key_bind(event, d))
-                    dialog.grid(row=i, column=1, padx=10, pady=5, sticky="w")
+                    dialog.grid(row=i, column=1, padx=10, pady=5, sticky="w", columnspan=2)
                     self.changes.append(dialog)
                 if action == "Array":
                     values = ast.literal_eval(line[line.find("["):line.rfind("]") + 1])
@@ -212,7 +239,7 @@ class ActiveScripts:
                                                          values=values,
                                                          variable=combobox_var)
                     combobox.bind("<Return>", lambda ev: text_callback(ev))
-                    combobox.grid(row=i, column=1, padx=10, pady=5, sticky="w")
+                    combobox.grid(row=i, column=1, padx=10, pady=5, sticky="w", columnspan=2)
                     self.changes.append([label.cget("text"), values])
                 if action == "Boolean":
                     label = customtkinter.CTkLabel(self.as_script_list, text=line[line.rfind(";") + 1:])
@@ -220,7 +247,7 @@ class ActiveScripts:
                     var = customtkinter.StringVar(value=line[line.find("=") + 1:line.rfind(";")].replace(" ", ""))
                     switch = customtkinter.CTkSwitch(self.as_script_list, text="", variable=var,
                                                      onvalue="True", offvalue="False")
-                    switch.grid(row=i, column=1, padx=30, pady=5, sticky="w")
+                    switch.grid(row=i, column=1, padx=30, pady=5, sticky="w", columnspan=2)
                     self.changes.append([label.cget("text"), var])
                 if action == "Value":
                     label = customtkinter.CTkLabel(self.as_script_list, text=line[line.rfind(";") + 1:])
@@ -228,9 +255,21 @@ class ActiveScripts:
                     placeholder = tkinter.StringVar(value=line[line.find("=") + 1:line.rfind(";")].replace(" ", ""))
                     dialog = customtkinter.CTkEntry(self.as_script_list, textvariable=placeholder,
                                                     placeholder_text=label.cget("text"))
-                    dialog.grid(row=i, column=1, padx=10, pady=5, sticky="w")
-                    placeholder.trace("w", lambda x, y, z: self.text_callback())
+                    dialog.grid(row=i, column=1, padx=10, pady=5, sticky="w", columnspan=2)
                     self.changes.append(dialog)
+                if action == "MouseMove":
+                    label = customtkinter.CTkLabel(self.as_script_list, text=line[line.rfind(";") + 1:])
+                    label.grid(row=i, column=0, pady=5, sticky="w")
+                    array = ast.literal_eval(line[line.find("=") + 1:line.rfind(";")].replace(" ", ""))
+                    placeholder1 = tkinter.StringVar(value=array[0])
+                    placeholder2 = tkinter.StringVar(value=array[1])
+                    dialog1 = customtkinter.CTkEntry(self.as_script_list, textvariable=placeholder1, width=60,
+                                                     placeholder_text=label.cget("text"))
+                    dialog1.grid(row=i, column=1, padx=10, pady=5, sticky="w")
+                    dialog2 = customtkinter.CTkEntry(self.as_script_list, textvariable=placeholder2, width=60,
+                                                     placeholder_text=label.cget("text"))
+                    dialog2.grid(row=i, column=2, padx=10, pady=5, sticky="e")
+                    self.changes.append([label.cget("text"), [placeholder1, placeholder2]])
 
     def load_script(self):
         for switch in self.scrollable_frame_switches:
@@ -246,16 +285,14 @@ class ActiveScripts:
         self.refresh()
 
     def key_bind(self, event, element):
+        if self.binding:
+            return
         win32api.LoadKeyboardLayout('00000409', 1)
-        self.keybind_window.geometry(f"+{self.app.winfo_rootx() + 300}+{self.app.winfo_rooty()}")
-        self.keybind_window.deiconify()
-        self.keybind_window.grab_set()
-        self.keybind_window.bind("<KeyPress>", lambda ev, el=element: self.keybind_window.key_bind(ev, el))
-        self.keybind_window.bind("<ButtonPress>", lambda ev, el=element: self.keybind_window.mouse_bind(ev, el))
-        self.keybind_window.bind("<MouseWheel>", lambda ev, el=element: self.keybind_window.mouse_wheel_bind(ev, el))
-
-    def text_callback(self):
-        self.cfg_save_button.configure(state="normal")
+        element.cget("textvariable").set("<Press Key>")
+        self.binding = True
+        self.app.bind("<KeyPress>", lambda ev, el=element: self.keyboard_bind(ev, el))
+        self.app.bind("<ButtonPress>", lambda ev, el=element: self.mouse_bind(ev, el))
+        self.app.bind("<MouseWheel>", lambda ev, el=element: self.mouse_wheel_bind(ev, el))
 
     def unload_all(self):
         process_name = self.app.ahk[self.app.ahk.rfind("\\") + 1:]
@@ -275,3 +312,60 @@ class ActiveScripts:
             text = self.app.ahk
         self.app.active_scripts_window.path_label.configure(text="AutoHotkey.exe path: " + text, cursor="hand2")
         self.app.active_scripts_window.path_label.bind("<Button-1>", self.app.open_path)
+
+    def mouse_bind(self, event, element):
+        try:
+            key = mouse_keys[event.num]
+        except:
+            self.app.unbind("<KeyPress>")
+            self.app.unbind("<ButtonPress>")
+            self.app.unbind("<MouseWheel>")
+            self.binding = False
+            return
+        if element.cget("textvariable").get() == key:
+            self.app.unbind("<KeyPress>")
+            self.app.unbind("<ButtonPress>")
+            self.app.unbind("<MouseWheel>")
+            self.binding = False
+            return
+        placeholder = tkinter.StringVar(value=key)
+        element.configure(textvariable=placeholder)
+        self.app.unbind("<KeyPress>")
+        self.app.unbind("<ButtonPress>")
+        self.app.unbind("<MouseWheel>")
+        self.binding = False
+
+    def keyboard_bind(self, event, element):
+        key = subprocess.check_output([self.app.ahk, self.app.lib_path + "\\key_decode.ahk", f'{event.keycode}']) \
+            .decode("utf-8")
+        if element.cget("textvariable").get() == key:
+            self.app.unbind("<KeyPress>")
+            self.app.unbind("<ButtonPress>")
+            self.app.unbind("<MouseWheel>")
+            self.binding = False
+            return
+        placeholder = tkinter.StringVar(value=key)
+        element.configure(textvariable=placeholder)
+        self.app.unbind("<KeyPress>")
+        self.app.unbind("<ButtonPress>")
+        self.app.unbind("<MouseWheel>")
+        self.binding = False
+
+    def mouse_wheel_bind(self, event, element):
+        key = None
+        if event.delta > 0:
+            key = "WheelUp"
+        if event.delta < 0:
+            key = "WheelDown"
+        if element.cget("textvariable").get() == key:
+            self.app.unbind("<KeyPress>")
+            self.app.unbind("<ButtonPress>")
+            self.app.unbind("<MouseWheel>")
+            self.binding = False
+            return
+        placeholder = tkinter.StringVar(value=key)
+        element.configure(textvariable=placeholder)
+        self.app.unbind("<KeyPress>")
+        self.app.unbind("<ButtonPress>")
+        self.app.unbind("<MouseWheel>")
+        self.binding = False

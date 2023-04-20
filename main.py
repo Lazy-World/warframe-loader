@@ -1,27 +1,3 @@
-"""
-# imports necessary to get the path where the files are extracted in
-import os
-import sys
-
-# initializing a variable containing the path where application files are stored.
-application_path = ''
-
-# attempting to get where the program files are stored
-if getattr(sys, 'frozen', False):
-    # if program was frozen (compiled) using pyinstaller, the pyinstaller bootloader creates a sys attribute
-    # frozen=True to indicate that the script file was compiled using pyinstaller, then it creates a
-    # constant in sys that points to the directory where program executable is (where program files are extracted in).
-    application_path = sys._MEIPASS
-else:
-    # if program is not frozen (compiled) using pyinstaller and is running normally like a Python 3.x.x file.
-    application_path = os.path.dirname(os.path.abspath(__file__))
-
-# changing the current working directory to the path where one-file mode source files are extracted in.
-os.chdir(application_path)
-
-# importing customtkinter
-from customtkinter import *
-"""
 import getpass
 import json
 import threading
@@ -51,9 +27,9 @@ def get_online_version():
 class App(customtkinter.CTk):
     def __init__(self):
         super().__init__()
-        self.path = 'C:\\Users\\%s\\AppData\\Roaming\\LazyHub' % getpass.getuser()
-        self.workshop_path = self.path+"\\workshop"
-        self.lib_path = self.path + "\\lib"
+        self.workshop_path = 'C:\\Users\\%s\\AppData\\Roaming\\LazyHub' % getpass.getuser()
+        self.lib_path = self.workshop_path + "\\libraries"
+        self.settings_path = self.workshop_path + "\\settings"
         self.ahk = None
         self.online_version = get_online_version()
         self.version = "3.0.4"
@@ -174,7 +150,7 @@ class App(customtkinter.CTk):
         self.loading_window.destroy()
 
     def save_settings(self):
-        with open(self.path + "\\hub.ini", "w") as file:
+        with open(self.workshop_path+"\\hub.ini", "w") as file:
             json.dump(self.json_settings, file)
         self.destroy()
 
@@ -187,6 +163,7 @@ class App(customtkinter.CTk):
         if name == "active_scripts":
             self.active_scripts_window.active_scripts_frame_1.grid(row=0, column=1, sticky="nsew")
             self.active_scripts_window.active_scripts_frame_2.grid(row=0, column=2, sticky="nsew")
+            self.active_scripts_window.cfg_back()
         else:
             self.active_scripts_window.active_scripts_frame_1.grid_forget()
             self.active_scripts_window.active_scripts_frame_2.grid_forget()
@@ -222,12 +199,12 @@ class App(customtkinter.CTk):
         self.select_frame_by_name("game_settings")
 
     def check_path(self):
-        if not os.path.exists(self.path + "\\lib"):
-            os.makedirs(self.path + "\\lib")
-        if not os.path.exists(self.path + "\\workshop"):
-            os.makedirs(self.path + "\\workshop")
-        if not os.path.exists(self.path + "\\workshop\\settings"):
-            os.makedirs(self.path + "\\workshop\\settings")
+        if not os.path.exists(self.workshop_path):
+            os.makedirs(self.workshop_path)
+        if not os.path.exists(self.settings_path):
+            os.makedirs(self.settings_path)
+        if not os.path.exists(self.lib_path):
+            os.makedirs(self.lib_path)
 
     def open_path(self, event):
         if self.ahk is not None:
@@ -241,9 +218,9 @@ class App(customtkinter.CTk):
         self.json_settings["theme"] = new_appearance_mode
 
     def set_appearance(self):
-        if not os.path.exists(self.path + "\\hub.ini"):
+        if not os.path.exists(self.workshop_path+"\\hub.ini"):
             return
-        with open(self.path + "\\hub.ini", "r") as file:
+        with open(self.workshop_path+"\\hub.ini", "r") as file:
             try:
                 json_settings = json.load(file)
                 if "theme" not in json_settings.keys():

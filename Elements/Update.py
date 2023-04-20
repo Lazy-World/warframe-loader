@@ -14,6 +14,7 @@ class Update:
     def __init__(self, app):
         self.condition = None
         self.app = app
+        self.image = tkinter.PhotoImage(file="assets\\loading.gif", format=f"gif -index {0}")
 
         self.updates_frame_1 = customtkinter.CTkFrame(self.app, corner_radius=0, fg_color="transparent")
         self.updates_frame_1.grid_columnconfigure(0, weight=1)
@@ -33,9 +34,7 @@ class Update:
 
         self.upd_libraries_button_processing = customtkinter.CTkButton(self.updates_frame_1, state="disabled",
                                                                        text="Processing...",
-                                                                       image=tkinter.PhotoImage(
-                                                                           file="assets\\loading.gif",
-                                                                           format=f"gif -index {0}"))
+                                                                       image=self.image)
 
         self.upd_folder_button = customtkinter.CTkButton(self.updates_frame_1, text="Open Folder",
                                                          command=self.open_folder)
@@ -52,7 +51,7 @@ class Update:
 
     def open_folder(self):
         self.app.check_path()
-        os.startfile(os.path.realpath(self.app.path + "\\lib"))
+        os.startfile(os.path.realpath(self.app.lib_path))
 
     def update_libs_event(self):
         threading._start_new_thread(self.update_libs, ())
@@ -69,7 +68,7 @@ class Update:
         json_answer = json.loads(answer.decode("utf-8"))
         for item in json_answer:
             if item["name"] != "game_settings.ahk" and item["name"] != "key_decode.ahk":
-                filename = self.app.path + "\\lib\\" + item["name"]
+                filename = self.app.lib_path + "\\" + item["name"]
                 r = requests.get(item["download_url"])
                 with open(filename, 'wb') as f:
                     f.write(r.content)

@@ -1,15 +1,19 @@
 import os
+import subprocess
 import tkinter
 import customtkinter
 import win32api
 
 from Elements.ConfirmationPopup import ConfirmationPopup
-from Elements.KeyBind import KeyBind
+
+mouse_keys = {1: "LButton", 3: "RButton", 2: "MButton", 4: "XButton1", 5: "XButton2"}
 
 
 class Settings:
     def __init__(self, app):
+        self.binding = None
         self.app = app
+        self.image = tkinter.PhotoImage(file="assets\\loading.gif", format=f"gif -index {0}")
         self.settings_frame_1 = customtkinter.CTkFrame(self.app, corner_radius=0, fg_color="transparent")
         self.settings_frame_1.grid_columnconfigure(0, weight=1)
         self.settings_frame_1.grid_rowconfigure(0, weight=1)
@@ -31,9 +35,7 @@ class Settings:
 
         self.upd_settings_button_processing = customtkinter.CTkButton(self.settings_frame_2, state="disabled",
                                                                       text="Processing...",
-                                                                      image=tkinter.PhotoImage(
-                                                                          file="assets\\loading.gif",
-                                                                          format=f"gif -index {0}"))
+                                                                      image=self.image)
 
         self.open_folder_button = customtkinter.CTkButton(self.settings_frame_2, text="Open Folder",
                                                           command=self.open_folder)
@@ -44,8 +46,6 @@ class Settings:
 
         self.confirm_window = ConfirmationPopup(self.app)
         self.confirm_window.withdraw()
-
-        self.keybind_window = KeyBind(self.app)
 
     def generate_settings(self):
         self.lines = None
@@ -62,7 +62,7 @@ class Settings:
                 if "=" not in line:
                     label = customtkinter.CTkLabel(self.items_list, text=line[line.rfind(";") + 1:],
                                                    font=customtkinter.CTkFont(weight="bold"))
-                    label.grid(row=i, column=0, pady=5, sticky="w", columnspan=2)
+                    label.grid(row=i, column=0, pady=5, sticky="nsew", columnspan=2)
                     self.changes.append(line)
                 else:
                     label = customtkinter.CTkLabel(self.items_list, text=line[line.rfind(";") + 1:])
@@ -105,16 +105,72 @@ class Settings:
         with open(settings, "w") as f:
             f.writelines(result)
 
-        self.save_button.configure(state="disabled")
-
     def text_callback(self):
         self.save_button.configure(state="normal")
 
     def key_bind(self, event, element):
+        if self.binding:
+            return
         win32api.LoadKeyboardLayout('00000409', 1)
-        self.keybind_window.geometry(f"+{self.app.winfo_rootx() + 300}+{self.app.winfo_rooty()}")
-        self.keybind_window.deiconify()
-        self.keybind_window.grab_set()
-        self.keybind_window.bind("<KeyPress>", lambda ev, el=element: self.keybind_window.key_bind(ev, el))
-        self.keybind_window.bind("<ButtonPress>", lambda ev, el=element: self.keybind_window.mouse_bind(ev, el))
-        self.keybind_window.bind("<MouseWheel>", lambda ev, el=element: self.keybind_window.mouse_wheel_bind(ev, el))
+        element.cget("textvariable").set("<Press Key>")
+        self.binding = True
+        self.app.bind("<KeyPress>", lambda ev, el=element: self.keyboard_bind(ev, el))
+        self.app.bind("<ButtonPress>", lambda ev, el=element: self.mouse_bind(ev, el))
+        self.app.bind("<MouseWheel>", lambda ev, el=element: self.mouse_wheel_bind(ev, el))
+
+    def mouse_bind(self, event, element):
+        try:
+            key = mouse_keys[event.num]
+        except:
+            self.app.unbind("<KeyPress>")
+            self.app.unbind("<ButtonPress>")
+            self.app.unbind("<MouseWheel>")
+            self.binding = False
+            return
+        if element.cget("textvariable").get() == key:
+            self.app.unbind("<KeyPress>")
+            self.app.unbind("<ButtonPress>")
+            self.app.unbind("<MouseWheel>")
+            self.binding = False
+            return
+        placeholder = tkinter.StringVar(value=key)
+        element.configure(textvariable=placeholder)
+        self.app.unbind("<KeyPress>")
+        self.app.unbind("<ButtonPress>")
+        self.app.unbind("<MouseWheel>")
+        self.binding = False
+
+    def keyboard_bind(self, event, element):
+        key = subprocess.check_output([self.app.ahk, self.app.lib_path + "\\key_decode.ahk", f'{event.keycode}']) \
+            .decode("utf-8")
+        if element.cget("textvariable").get() == key:
+            self.app.unbind("<KeyPress>")
+            self.app.unbind("<ButtonPress>")
+            self.app.unbind("<MouseWheel>")
+            self.binding = False
+            return
+        placeholder = tkinter.StringVar(value=key)
+        element.configure(textvariable=placeholder)
+        self.app.unbind("<KeyPress>")
+        self.app.unbind("<ButtonPress>")
+        self.app.unbind("<MouseWheel>")
+        self.binding = False
+
+    def mouse_wheel_bind(self, event, element):
+        key = None
+        if event.delta > 0:
+            key = "WheelUp"
+        if event.delta < 0:
+            key = "WheelDown"
+        if element.cget("textvariable").get() == key:
+            self.app.unbind("<KeyPress>")
+            self.app.unbind("<ButtonPress>")
+            self.app.unbind("<MouseWheel>")
+            self.binding = False
+            return
+        placeholder = tkinter.StringVar(value=key)
+        element.configure(textvariable=placeholder)
+        self.app.unbind("<KeyPress>")
+        self.app.unbind("<ButtonPress>")
+        self.app.unbind("<MouseWheel>")
+        self.binding = False

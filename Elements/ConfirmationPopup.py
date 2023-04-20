@@ -7,6 +7,7 @@ from Elements.ctk_toplevel import CTkToplevel
 class ConfirmationPopup(CTkToplevel):
     def __init__(self, main_app):
         super().__init__()
+        self.condition = False
         self.main_app = main_app
         self.geometry("150x100")
         self.title("LazyHub")
@@ -34,14 +35,15 @@ class ConfirmationPopup(CTkToplevel):
         self.condition = False
         self.main_app.settings_window.upd_settings_button.configure(state="disabled")
         self.main_app.settings_window.upd_settings_button.grid_forget()
-        self.main_app.settings_window.upd_settings_button_processing.grid(row=0, column=0, padx=(20, 20), pady=(10, 0), sticky="nsew")
+        self.main_app.settings_window.upd_settings_button_processing.grid(row=0, column=0,
+                                                                          padx=(20, 20), pady=(10, 0), sticky="nsew")
         self.main_app.after(50, self.processing_animation, self.condition)
 
         self.withdraw()
         self.grab_release()
         self.main_app.check_path()
-        settings = self.main_app.path + "\\lib\\game_settings.ahk"
-        key_decode = self.main_app.path + "\\lib\\key_decode.ahk"
+        settings = self.main_app.lib_path + "\\game_settings.ahk"
+        key_decode = self.main_app.lib_path + "\\key_decode.ahk"
         r1 = requests.get("https://raw.githubusercontent.com/Lazy-World/warframe-ahk/main/libraries/game_settings.ahk")
         with open(settings, 'wb') as f:
             f.write(r1.content)
@@ -55,7 +57,8 @@ class ConfirmationPopup(CTkToplevel):
         self.condition = True
         self.main_app.settings_window.upd_settings_button.configure(state="normal")
         self.main_app.settings_window.upd_settings_button_processing.grid_forget()
-        self.main_app.settings_window.upd_settings_button.grid(row=0, column=0, padx=(20, 20), pady=(10, 0), sticky="nsew")
+        self.main_app.settings_window.upd_settings_button.grid(row=0, column=0, padx=(20, 20), pady=(10, 0),
+                                                               sticky="nsew")
 
     def decline(self):
         self.withdraw()
@@ -63,7 +66,8 @@ class ConfirmationPopup(CTkToplevel):
 
     def processing_animation(self, condition):
         if not self.condition:
-            self.main_app.settings_window.upd_settings_button_processing.configure(image=next(self.main_app.reload_button_icon_anim))
+            self.main_app.settings_window.upd_settings_button_processing.\
+                configure(image=next(self.main_app.reload_button_icon_anim))
             self.main_app.after(50, self.processing_animation, self.condition)
         else:
             return

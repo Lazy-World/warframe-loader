@@ -1,4 +1,3 @@
-import getpass
 import json
 import os
 import customtkinter
@@ -28,19 +27,16 @@ class AhkLoadingWindow(CTkToplevel):
         self.label_3 = customtkinter.CTkLabel(self.main_frame, text="", width=200)
         self.label_3.grid(row=1, column=1)
 
-        self.path = 'C:\\Users\\%s\\AppData\\Roaming\\LazyHub' % getpass.getuser()
         self.main_app = main_app
         self.iconbitmap("assets\\cat.ico")
 
     def generate_ini(self):
-        if not os.path.exists(self.path):
-            os.mkdir(self.path)
-        if not os.path.exists(self.path + "\\hub.ini"):
+        if not os.path.exists(self.main_app.workshop_path+"\\hub.ini"):
             self.main_app.ahk = self.find_autohotkey()
             self.main_app.json_settings = {"Version": self.main_app.version, "ahk_path": self.main_app.ahk,
                                            "theme": "System"}
         else:
-            with open(self.path + "\\hub.ini", "r") as file:
+            with open(self.main_app.workshop_path+"\\hub.ini", "r") as file:
                 try:
                     self.main_app.json_settings = json.load(file)
                 except json.JSONDecodeError:
@@ -84,6 +80,8 @@ class AhkLoadingWindow(CTkToplevel):
                 try:
                     self.label_3.configure(text=label_text, anchor="w")
                 except TclError:
+                    self.main_app.json_settings = {"Version": self.main_app.version,
+                                                   "theme": "System"}
                     raise Exception
 
                 if name in files:
