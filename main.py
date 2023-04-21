@@ -10,7 +10,6 @@ from PIL import Image
 
 from Elements.ActiveScripts import ActiveScripts
 from Elements.Workshop import Workshop
-from Elements.Update import Update
 from Elements.Settings import Settings
 from Elements.AhkLoadingWindow import AhkLoadingWindow
 from Elements.UpdatesPopup import UpdatePopup
@@ -32,7 +31,7 @@ class App(customtkinter.CTk):
         self.settings_path = self.workshop_path + "\\settings"
         self.ahk = None
         self.online_version = get_online_version()
-        self.version = "3.0.4"
+        self.version = "3.0.5"
         self.json_settings = {}
         self.scrollable_frame_switches = None
         self.scrollable_frame = None
@@ -48,7 +47,7 @@ class App(customtkinter.CTk):
         self.iconbitmap("assets\\cat.ico")
         # elements
         self.tab_groups = []
-        self.tab_groups_names = ["active_scripts", "workshop", "game_settings", "updates"]
+        self.tab_groups_names = ["active_scripts", "workshop", "game_settings"]
         self.tab_elements = []
         #################################
         # Navigation
@@ -69,8 +68,7 @@ class App(customtkinter.CTk):
         self.buttons = [
             {"text": "Your Scripts", "command": self.active_scripts_button_event},
             {"text": "Workshop", "command": self.workshop_button_event},
-            {"text": "Game Settings", "command": self.settings_button_event},
-            {"text": "Updates", "command": self.updates_button_event}
+            {"text": "Game Settings", "command": self.settings_button_event}
         ]
 
         for i, button_data in enumerate(self.buttons):
@@ -104,12 +102,6 @@ class App(customtkinter.CTk):
         #################################
 
         self.workshop_window = Workshop(self)
-
-        #################################
-        # Updates Frame
-        #################################
-
-        self.update_window = Update(self)
 
         #################################
         # Settings Frame
@@ -179,21 +171,12 @@ class App(customtkinter.CTk):
         else:
             self.settings_window.settings_frame_1.grid_forget()
             self.settings_window.settings_frame_2.grid_forget()
-        if name == "updates":
-            self.update_window.updates_frame_1.grid(row=0, column=1, sticky="nsew")
-            self.update_window.updates_frame_2.grid(row=0, column=2, sticky="nsew")
-        else:
-            self.update_window.updates_frame_1.grid_forget()
-            self.update_window.updates_frame_2.grid_forget()
 
     def active_scripts_button_event(self):
         self.select_frame_by_name("active_scripts")
 
     def workshop_button_event(self):
         self.select_frame_by_name("workshop")
-
-    def updates_button_event(self):
-        self.select_frame_by_name("updates")
 
     def settings_button_event(self):
         self.select_frame_by_name("game_settings")

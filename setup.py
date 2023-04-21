@@ -1,10 +1,9 @@
 from cx_Freeze import setup, Executable
+import sys
 
 # Dependencies are automatically detected, but it might need
 # fine tuning.
 build_options = {'packages': [], 'excludes': [], "include_files": ['assets/']}
-
-import sys
 
 base = 'Win32GUI' if sys.platform == 'win32' else None
 
@@ -15,6 +14,6 @@ executables = [
 
 setup(name='LazyHub',
       version='3.0.5',
-      description='Warframe ahk scripts',
+      description='LazyHub',
       options={'build_exe': build_options},
       executables=executables)

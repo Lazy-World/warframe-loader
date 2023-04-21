@@ -32,6 +32,7 @@ class DownloadWindow(CTkToplevel):
         self.install_button = customtkinter.CTkButton(self.main_frame, text="Install", width=240,
                                                       state="disabled", command=self.install)
         self.install_button.grid(row=2, column=0, padx=10, pady=10, sticky="nsew")
+        self.protocol("WM_DELETE_WINDOW", self.close)
 
     def download(self):
         with open(self.main_app.workshop_path + "\\LazyHubSetup.exe", 'wb') as f:
@@ -61,5 +62,11 @@ class DownloadWindow(CTkToplevel):
             return
 
     def install(self):
+        pass
         subprocess.Popen([self.main_app.workshop_path + "\\LazyHubSetup.exe",
                           "/SP-", "/silent", "/noicons", f"/dir=expand:{os.getcwd()}"])
+
+    def close(self):
+        if os.path.exists(self.main_app.workshop_path + "\\LazyHubSetup.exe"):
+            os.remove(self.main_app.workshop_path + "\\LazyHubSetup.exe")
+        self.destroy()
