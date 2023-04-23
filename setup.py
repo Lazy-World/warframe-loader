@@ -13,7 +13,7 @@ executables = [
 ]
 
 setup(name='LazyHub',
-      version='3.0.5',
+      version='3.0.7',
       description='LazyHub',
       options={'build_exe': build_options},
       executables=executables)

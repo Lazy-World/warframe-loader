@@ -9,6 +9,7 @@ from os.path import isfile, join
 from tkinter.filedialog import askopenfilename
 import customtkinter
 import os
+from Elements.tooltip import ToolTip
 
 mouse_keys = {1: "LButton", 3: "RButton", 2: "MButton", 4: "XButton1", 5: "XButton2"}
 
@@ -101,7 +102,8 @@ class ActiveScripts:
                                 result.append(line)
                                 break
                             else:
-                                line = line[:line.find("=") + 2] + json.dumps(change[1]) + " " + line[line.rfind(";"):]
+                                line = line[:line.find("=") + 2] + \
+                                       json.dumps(change[1], ensure_ascii=False) + " " + line[line.rfind(";"):]
                                 result.append(line)
                                 break
                         elif type(change[1]) is customtkinter.StringVar:
@@ -143,6 +145,7 @@ class ActiveScripts:
             switch_label.bind("<Button-1>", lambda event, script="cfg_" + name: self.configure_script(script))
             switch_label.bind("<Enter>", lambda event, sw=switch_label: sw.configure(image=self.configure_2))
             switch_label.bind("<Leave>", lambda event, sw=switch_label: sw.configure(image=self.configure))
+            ToolTip(switch, msg=switch.cget("text"), delay=0.3)
             self.scrollable_frame_switches.append(switch)
             self.scrollable_frame_labels.append(switch_label)
 
@@ -159,6 +162,7 @@ class ActiveScripts:
         self.lines = []
         self.changes = []
         action = None
+        tooltip = None
         cfg = self.app.settings_path + "\\" + script
         if os.path.isfile(cfg):
             with open(cfg, "r") as file:
@@ -167,6 +171,10 @@ class ActiveScripts:
             for i, line in enumerate(self.lines):
                 if line == "\n":
                     self.changes.append(line)
+                    continue
+                if "@Tooltip" in line:
+                    self.changes.append(line)
+                    tooltip = line[line.find("@")+9:]
                     continue
                 if "@Bind" in line:
                     self.changes.append(line)
@@ -201,6 +209,9 @@ class ActiveScripts:
                 if action == "Bind":
                     label = customtkinter.CTkLabel(self.as_script_list, text=line[line.rfind(";") + 1:])
                     label.grid(row=i, column=0, pady=5, sticky="w")
+                    if tooltip is not None:
+                        ToolTip(label, tooltip)
+                        tooltip = None
                     placeholder = tkinter.StringVar(value=line[line.find("=") + 1:line.rfind(";")].replace(" ", ""))
                     dialog = customtkinter.CTkEntry(self.as_script_list, textvariable=placeholder, state="disabled",
                                                     placeholder_text=label.cget("text"))
@@ -233,6 +244,9 @@ class ActiveScripts:
 
                     label = customtkinter.CTkLabel(self.as_script_list, text=line[line.rfind(";") + 1:])
                     label.grid(row=i, column=0, pady=5, sticky="w")
+                    if tooltip is not None:
+                        ToolTip(label, tooltip)
+                        tooltip = None
                     combobox_var = customtkinter.StringVar(value="")
                     combobox = customtkinter.CTkComboBox(self.as_script_list,
                                                          command=combobox_callback,
@@ -244,6 +258,9 @@ class ActiveScripts:
                 if action == "Boolean":
                     label = customtkinter.CTkLabel(self.as_script_list, text=line[line.rfind(";") + 1:])
                     label.grid(row=i, column=0, pady=5, sticky="w")
+                    if tooltip is not None:
+                        ToolTip(label, tooltip)
+                        tooltip = None
                     var = customtkinter.StringVar(value=line[line.find("=") + 1:line.rfind(";")].replace(" ", ""))
                     switch = customtkinter.CTkSwitch(self.as_script_list, text="", variable=var,
                                                      onvalue="True", offvalue="False")
@@ -252,6 +269,9 @@ class ActiveScripts:
                 if action == "Value":
                     label = customtkinter.CTkLabel(self.as_script_list, text=line[line.rfind(";") + 1:])
                     label.grid(row=i, column=0, pady=5, sticky="w")
+                    if tooltip is not None:
+                        ToolTip(label, tooltip)
+                        tooltip = None
                     placeholder = tkinter.StringVar(value=line[line.find("=") + 1:line.rfind(";")].replace(" ", ""))
                     dialog = customtkinter.CTkEntry(self.as_script_list, textvariable=placeholder,
                                                     placeholder_text=label.cget("text"))
@@ -260,6 +280,9 @@ class ActiveScripts:
                 if action == "MouseMove":
                     label = customtkinter.CTkLabel(self.as_script_list, text=line[line.rfind(";") + 1:])
                     label.grid(row=i, column=0, pady=5, sticky="w")
+                    if tooltip is not None:
+                        ToolTip(label, tooltip)
+                        tooltip = None
                     array = ast.literal_eval(line[line.find("=") + 1:line.rfind(";")].replace(" ", ""))
                     placeholder1 = tkinter.StringVar(value=array[0])
                     placeholder2 = tkinter.StringVar(value=array[1])

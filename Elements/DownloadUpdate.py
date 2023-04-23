@@ -62,7 +62,6 @@ class DownloadWindow(CTkToplevel):
             return
 
     def install(self):
-        pass
         subprocess.Popen([self.main_app.workshop_path + "\\LazyHubSetup.exe",
                           "/SP-", "/silent", "/noicons", f"/dir=expand:{os.getcwd()}"])
 

@@ -98,38 +98,34 @@ class Workshop:
         self.ws_load_button.grid(row=1, column=0, padx=(20, 10), pady=(10, 10), sticky="nsew")
 
     def download_cfg(self):
-        def cfg_equal(script):
-            if not os.path.exists(cfg):
-                return False
-            with open(self.app.settings_path + f"\\cfg_{script}") as file:
-                current_cfg = file.readlines()
-            for i in range(len(current_cfg)):
-                current_cfg[i] = current_cfg[i].replace(" ", "").rstrip()
-                if "=" in current_cfg[i]:
-                    current_cfg[i] = current_cfg[i][:current_cfg[i].find("=")] + current_cfg[i][
-                        current_cfg[i].rfind(";")]
-
-            online_cfg = requests.get(f"https://raw.githubusercontent.com/Lazy-World/warframe-ahk/main/settings/"
-                                      f"{'cfg_' + script}").content.decode("utf-8").splitlines()
-
-            for i in range(len(online_cfg)):
-                online_cfg[i] = online_cfg[i].replace(" ", "").rstrip()
-                if "=" in online_cfg[i]:
-                    online_cfg[i] = online_cfg[i][:online_cfg[i].find("=")] + online_cfg[i][online_cfg[i].rfind(";")]
-
-            if online_cfg == current_cfg:
-                return True
-            else:
-                return False
-
         for switch in self.scrollable_frame_switches_2:
             if switch.get() == 1:
                 cfg = self.app.settings_path + "\\cfg_" + switch.cget("text")
-                if not os.path.exists(cfg) or not cfg_equal(switch.cget('text')):
-                    rq = requests.get(f"https://raw.githubusercontent.com/Lazy-World/warframe-ahk/main/settings/"
-                                      f"{'cfg_' + switch.cget('text')}")
-                    with open(cfg, 'wb') as f:
-                        f.write(rq.content)
+                rq = requests.get(f"https://raw.githubusercontent.com/Lazy-World/warframe-ahk/main/settings/"
+                                  f"{'cfg_' + switch.cget('text')}")
+                if not os.path.exists(cfg):
+                    with open(cfg, 'w') as f:
+                        f.write(rq.content.decode("utf-8-sig"))
+                else:
+                    online_cfg = rq.content.decode("utf-8-sig").splitlines(keepends=True)
+
+                    with open(cfg, 'r') as file:
+                        current_cfg = file.readlines()
+
+                    for line in current_cfg:
+                        if "=" in line:
+                            current_cfg_line = line.replace(" ", "")
+                            current_cfg_line = current_cfg_line[:current_cfg_line.find("=")]
+                            for i in range(len(online_cfg)):
+                                online_cfg_line = online_cfg[i].replace(" ", "")
+                                online_cfg_line = online_cfg_line[:online_cfg_line.find("=")]
+                                if current_cfg_line == online_cfg_line:
+                                    online_cfg[i] = online_cfg[i][:online_cfg[i].find("=") + 1] + line[line.find(
+                                        "=") + 1:line.rfind(";")] + online_cfg[i][online_cfg[i].rfind(";"):]
+
+                    if online_cfg != current_cfg:
+                        with open(cfg, 'w') as f:
+                            f.writelines(online_cfg)
 
     def refresh_event(self):
         threading._start_new_thread(self.refresh, ())
@@ -207,7 +203,13 @@ class Workshop:
         answer = requests.get("https://api.github.com/repos/Lazy-World/warframe-ahk/contents/libraries").content
         json_answer = json.loads(answer.decode("utf-8"))
         for item in json_answer:
-            if item["name"] != "game_settings.ahk" and item["name"] != "key_decode.ahk":
+            if item["name"] == "game_settings.ahk":
+                if not os.path.exists(self.app.lib_path + "\\" + item["name"]):
+                    filename = self.app.lib_path + "\\" + item["name"]
+                    r = requests.get(item["download_url"])
+                    with open(filename, 'wb') as f:
+                        f.write(r.content)
+            else:
                 filename = self.app.lib_path + "\\" + item["name"]
                 r = requests.get(item["download_url"])
                 with open(filename, 'wb') as f:

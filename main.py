@@ -31,7 +31,7 @@ class App(customtkinter.CTk):
         self.settings_path = self.workshop_path + "\\settings"
         self.ahk = None
         self.online_version = get_online_version()
-        self.version = "3.0.5"
+        self.version = "3.0.7"
         self.json_settings = {}
         self.scrollable_frame_switches = None
         self.scrollable_frame = None
